@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface HistorialEstadoRepository extends JpaRepository<HistorialEstado, Long> {
-    List<HistorialEstado> findByPedidoIdOrderByFechaAsc(Long pedidoId);
+    /** HU-10: en orden cronológico (el id desempata cambios del mismo instante). */
+    List<HistorialEstado> findByPedidoIdOrderByFechaAscIdAsc(Long pedidoId);
 }

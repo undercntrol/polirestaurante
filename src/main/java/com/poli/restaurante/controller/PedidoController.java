@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/** HU-01, HU-02, HU-05, HU-06, HU-07 y HU-08: lo que hace el mesero sobre un pedido. */
+/** HU-01, HU-02 y HU-05 a HU-08: lo que hace el mesero sobre un pedido. HU-10: historial de estados. */
 @RestController
 @RequestMapping("/api/pedidos")
 @RequiredArgsConstructor
@@ -34,6 +34,12 @@ public class PedidoController {
     @GetMapping("/{id}")
     public PedidoResponse obtener(@PathVariable Long id) {
         return facade.obtener(id);
+    }
+
+    /** HU-10: historial de estados del pedido, en orden cronológico y de solo lectura. */
+    @GetMapping("/{id}/historial")
+    public List<HistorialResponse> historial(@PathVariable Long id) {
+        return facade.historial(id);
     }
 
     /** HU-02: agregar un producto (con cantidad y notas opcionales). */

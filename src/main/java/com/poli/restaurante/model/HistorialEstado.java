@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDateTime;
 
 /** Registro de solo lectura: se inserta una vez y no se edita ni se borra (RNF-08). */
 @Entity
+@Immutable
 @Table(name = "historial_estado")
 @Getter @Setter @NoArgsConstructor
 public class HistorialEstado {

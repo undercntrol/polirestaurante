@@ -4,6 +4,7 @@ import com.poli.restaurante.dto.*;
 import com.poli.restaurante.exception.NoEncontradoException;
 import com.poli.restaurante.model.EstadoPedido;
 import com.poli.restaurante.model.Pedido;
+import com.poli.restaurante.repository.HistorialEstadoRepository;
 import com.poli.restaurante.repository.MesaRepository;
 import com.poli.restaurante.repository.MetodoPagoRepository;
 import com.poli.restaurante.repository.PedidoRepository;
@@ -29,6 +30,7 @@ public class PedidoFacade {
     private final ProductoRepository productoRepository;
     private final MesaRepository mesaRepository;
     private final MetodoPagoRepository metodoPagoRepository;
+    private final HistorialEstadoRepository historialRepository;
 
     // ----- Mesero -----
 
@@ -61,6 +63,16 @@ public class PedidoFacade {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new NoEncontradoException("Pedido no encontrado: " + pedidoId));
         return PedidoResponse.de(pedido);
+    }
+
+    /** HU-10: solo lectura; no hay ningún endpoint que edite o borre el historial. */
+    @Transactional(readOnly = true)
+    public List<HistorialResponse> historial(Long pedidoId) {
+        if (!pedidoRepository.existsById(pedidoId)) {
+            throw new NoEncontradoException("Pedido no encontrado: " + pedidoId);
+        }
+        return historialRepository.findByPedidoIdOrderByFechaAscIdAsc(pedidoId).stream()
+                .map(HistorialResponse::de).toList();
     }
 
     /** HU-08 */

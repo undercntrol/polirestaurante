@@ -38,6 +38,7 @@ function pintar() {
     + (p.estado === 'ENTREGADO' ? (p.estadoPago === 'PAGADO'
         ? `<p class="nota" style="text-align:right">Pagado con ${esc(p.metodoPago)}</p>`
         : `<h2 style="margin-top:20px">Registrar pago</h2><div class="campos"><select id="metodo" aria-label="Método de pago">${metodos.map(m => `<option value="${m.id}">${esc(m.nombre)}</option>`).join('')}</select><button id="pagar">Registrar pago</button></div>`) : '')
+    + '<button id="verHistorial" class="claro" style="width:100%;margin-top:12px">Ver historial de estados</button><div id="historial"></div>'
     + (edita ? `<h2 style="margin-top:20px">Menú</h2>${items}` : '');
 }
 
@@ -62,6 +63,9 @@ $('#panel').addEventListener('click', async e => {
       mostrar(await api(`/pedidos/${pedido.id}/detalles`, 'POST', {productoId: +t.dataset.agregar, cantidad: +c.children[0].value || 1, notas: c.children[1].value.trim() || null}));
     } else if (t.dataset.quitar) {
       mostrar(await api(`/pedidos/${pedido.id}/detalles/${t.dataset.quitar}`, 'DELETE'));
+    } else if (t.id === 'verHistorial') {
+      const hist = await api(`/pedidos/${pedido.id}/historial`);
+      $('#historial').innerHTML = hist.map(h => `<div class="linea"><div><span class="chip e-${h.estado}">${ETIQ[h.estado]}</span> <span class="nota">por ${esc(h.actorNombre || '—')} (${(h.actorTipo || '').toLowerCase()})</span></div><div class="nota">${new Date(h.fecha).toLocaleString('es-CO')}</div></div>`).join('');
     } else if (t.id === 'cancelar') {
       if (!confirm('¿Cancelar el pedido n.º ' + pedido.id + '?')) return;
       mostrar(await api(`/pedidos/${pedido.id}/cancelar`, 'PUT', {meseroId: MESERO})); aviso('Pedido cancelado'); cargarMesas();
