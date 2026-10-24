@@ -40,4 +40,14 @@ public class ManejadorErrores {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", "El dato ya existe o está siendo usado por otro registro"));
     }
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<Map<String, String>> credenciales(CredencialesInvalidasException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(CuentaInactivaException.class)
+    public ResponseEntity<Map<String, String>> cuentaInactiva(CuentaInactivaException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+    }
 }

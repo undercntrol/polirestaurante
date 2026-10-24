@@ -1,6 +1,7 @@
 package com.poli.restaurante.service;
 
 import com.poli.restaurante.dto.*;
+import com.poli.restaurante.model.Rol;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ public class AdminFacade {
     private final ProductoService productoService;
     private final CategoriaService categoriaService;
     private final MesaService mesaService;
+    private final UsuarioService usuarioService;
 
     // ----- HU-11: productos -----
 
@@ -99,5 +101,25 @@ public class AdminFacade {
     public void eliminarMesa(Long adminId, Long mesaId) {
         acceso.exigirAdministrador(adminId);
         mesaService.eliminar(mesaId);
+    }
+
+    // ----- HU-14: usuarios -----
+
+    @Transactional(readOnly = true)
+    public List<UsuarioResponse> usuarios(Long adminId) {
+        acceso.exigirAdministrador(adminId);
+        return usuarioService.todos().stream().map(UsuarioResponse::de).toList();
+    }
+
+    @Transactional
+    public UsuarioResponse crearUsuario(Long adminId, UsuarioRequest req) {
+        acceso.exigirAdministrador(adminId);
+        return UsuarioResponse.de(usuarioService.crear(req));
+    }
+
+    @Transactional
+    public UsuarioResponse cambiarEstadoUsuario(Long adminId, Rol rol, Long usuarioId, boolean activo) {
+        acceso.exigirAdministrador(adminId);
+        return UsuarioResponse.de(usuarioService.cambiarEstado(rol, usuarioId, activo, adminId));
     }
 }
