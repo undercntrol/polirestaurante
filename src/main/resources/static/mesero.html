@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mesero · PoliRestaurante</title><link rel="stylesheet" href="css/estilos.css"></head>
+<body><header><h1>Mesero</h1><a href="index.html">Inicio</a></header>
+<main class="dos">
+<section><h2>Mesas</h2><div id="mesas" class="mesas"></div>
+<h2 style="margin-top:22px">Abrir un pedido</h2>
+<div class="campos"><input id="nroPedido" type="number" min="1" placeholder="Número de pedido"><button class="claro" id="abrir">Abrir</button></div></section>
+<section id="panel"><p class="vacio">Elige una mesa libre para crear un pedido.</p></section>
+</main><div id="aviso" role="status"></div>
+<script src="js/api.js"></script>
+<script>
+const MESERO = 1; // usuario "mesero" de los datos de prueba (aún no hay login)
+let pedido = null, menu = [];
+
+async function cargarMesas() {
+  const mesas = await api('/mesas');
+  $('#mesas').innerHTML = mesas.map(m => `<button class="mesa ${m.estado.toLowerCase()}" data-id="${m.id}" ${m.estado === 'OCUPADA' ? 'disabled' : ''}>Mesa ${m.numero}<br><small>${m.estado === 'LIBRE' ? 'libre' : 'ocupada'}</small></button>`).join('');
+}
+function mostrar(p) { pedido = p; localStorage.setItem('pedido', p.id); pintar(); }
+
+function pintar() {
+  const p = pedido, edita = p.estado === 'PENDIENTE';
+  const lineas = p.detalles.length ? p.detalles.map(d => `<div class="linea"><div>${d.cantidad} × ${esc(d.productoNombre)}${d.notas ? `<div class="nota">${esc(d.notas)}</div>` : ''}</div><div>${pesos(d.subtotal)} ${edita ? `<button class="claro" data-quitar="${d.id}">Quitar</button>` : ''}</div></div>`).join('') : '<p class="vacio">Todavía no hay productos. Agrégalos desde el menú.</p>';
+  const items = menu.map(m => `<div class="menu-item"><div><strong>${esc(m.nombre)}</strong><div class="nota">${esc(m.categoria)}</div></div><div>${pesos(m.precio)}</div><div class="campos"><input type="number" min="1" value="1" aria-label="Cantidad"><input type="text" placeholder="Notas (ej. sin cebolla)" aria-label="Notas"><button data-agregar="${m.id}">Agregar</button></div></div>`).join('');
+  $('#panel').innerHTML = `<h2>Mesa ${p.mesaNumero} <span class="chip e-${p.estado}">${ETIQ[p.estado]}</span> <span class="nota">pedido n.º ${p.id}</span></h2>${lineas}<div class="total">Total ${pesos(p.total)}</div>`
+    + (p.estado === 'LISTO' ? '<button id="entregar" style="width:100%;margin-top:12px">Marcar como entregado</button>' : '')
+    + (edita ? `<h2 style="margin-top:20px">Menú</h2>${items}` : '');
+}
+
+$('#mesas').addEventListener('click', async e => {
+  const b = e.target.closest('.mesa'); if (!b) return;
+  try { mostrar(await api('/pedidos', 'POST', {mesaId: +b.dataset.id, meseroId: MESERO})); aviso('Pedido creado'); cargarMesas(); }
+  catch (err) { aviso(err.message, true); }
+});
+$('#panel').addEventListener('click', async e => {
+  const t = e.target;
+  try {
+    if (t.dataset.agregar) {
+      const c = t.parentElement;
+      mostrar(await api(`/pedidos/${pedido.id}/detalles`, 'POST', {productoId: +t.dataset.agregar, cantidad: +c.children[0].value || 1, notas: c.children[1].value.trim() || null}));
+    } else if (t.dataset.quitar) {
+      mostrar(await api(`/pedidos/${pedido.id}/detalles/${t.dataset.quitar}`, 'DELETE'));
+    } else if (t.id === 'entregar') {
+      mostrar(await api(`/pedidos/${pedido.id}/entregar`, 'PUT', {usuarioId: MESERO})); aviso('Pedido entregado'); cargarMesas();
+    }
+  } catch (err) { aviso(err.message, true); }
+});
+$('#abrir').onclick = async () => {
+  try { mostrar(await api('/pedidos/' + $('#nroPedido').value)); } catch (err) { aviso(err.message, true); }
+};
+// Si cocina cambia el estado, se refleja solo (cada 5 s)
+setInterval(async () => {
+  if (!pedido) return;
+  try { const p = await api('/pedidos/' + pedido.id); if (p.estado !== pedido.estado) { mostrar(p); cargarMesas(); } } catch (e) {}
+}, 5000);
+
+(async () => {
+  try {
+    await cargarMesas(); menu = await api('/menu');
+    const id = localStorage.getItem('pedido');
+    if (id) { try { mostrar(await api('/pedidos/' + id)); } catch (e) {} }
+  } catch (err) { aviso('No se pudo conectar con el servidor', true); }
+})();
+</script></body></html>

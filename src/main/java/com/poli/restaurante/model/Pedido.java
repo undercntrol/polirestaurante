@@ -1,0 +1,54 @@
+package com.poli.restaurante.model;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "pedido")
+@Getter @Setter @NoArgsConstructor
+public class Pedido {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "mesa_id")
+    private Mesa mesa;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "mesero_id")
+    private Usuario mesero;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EstadoPedido estado = EstadoPedido.PENDIENTE;
+
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    private LocalDateTime fechaCreacion;
+
+    @Column(name = "fecha_ultima_actualizacion", nullable = false)
+    private LocalDateTime fechaUltimaActualizacion;
+
+    @Column(name = "metodo_pago")
+    private String metodoPago;
+
+    @Column(nullable = false)
+    private boolean pagado = false;
+
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetallePedido> detalles = new ArrayList<>();
+
+    @PrePersist
+    void alCrear() {
+        LocalDateTime ahora = LocalDateTime.now();
+        fechaCreacion = ahora;
+        fechaUltimaActualizacion = ahora;
+    }
+}

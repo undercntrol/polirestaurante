@@ -1,0 +1,36 @@
+:root{--fondo:#E9EDF2;--papel:#fff;--tinta:#16202E;--suave:#5B6676;--linea:#D3DAE3;
+--pendiente:#E8A100;--preparacion:#2B6BD6;--listo:#1E9E5A;--entregado:#7A8594;--cancelado:#C23A3A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);font:17px/1.4 "Segoe UI",system-ui,sans-serif}
+header{background:var(--tinta);color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:baseline}
+header h1{margin:0;font-size:1.4rem}
+header a{color:#c9d3e0;text-decoration:none}
+main{max-width:1100px;margin:0 auto;padding:20px;display:grid;gap:20px}
+main.dos{grid-template-columns:320px 1fr;align-items:start}
+@media(max-width:800px){main.dos{grid-template-columns:1fr}}
+section{background:var(--papel);border-radius:10px;padding:18px;border:1px solid var(--linea)}
+h2{margin:0 0 12px;font-size:1.15rem}
+button,input{font:inherit}
+button{min-height:48px;padding:0 18px;border:0;border-radius:8px;background:var(--tinta);color:#fff;font-weight:600;cursor:pointer}
+button:disabled{background:#c5ccd6;color:#7d8794;cursor:not-allowed}
+button.claro{background:#fff;color:var(--tinta);border:1px solid var(--linea);min-height:40px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--preparacion);outline-offset:2px}
+input{min-height:44px;padding:0 10px;border:1px solid var(--linea);border-radius:8px}
+.mesas{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.mesa{background:#fff;color:var(--tinta);border:2px solid var(--listo);line-height:1.2;padding:8px}
+.mesa.ocupada{border-color:var(--pendiente);background:#FFF6DD}
+.e-PENDIENTE{--c:var(--pendiente)}.e-EN_PREPARACION{--c:var(--preparacion)}.e-LISTO{--c:var(--listo)}
+.e-ENTREGADO{--c:var(--entregado)}.e-CANCELADO{--c:var(--cancelado)}
+.chip{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--c);color:#fff;font-size:.85rem;font-weight:600}
+.tickets{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.ticket{background:#fff;border:1px solid var(--linea);border-left:8px solid var(--c);border-radius:10px;padding:14px}
+.cab{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:1.1rem}
+.linea{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--linea)}
+.nota{color:var(--suave);font-size:.9rem}
+.vacio{color:var(--suave);padding:24px 0;text-align:center}
+.total{font-weight:700;font-size:1.2rem;text-align:right;padding-top:10px}
+.menu-item{display:grid;grid-template-columns:1fr auto;gap:6px 10px;padding:10px 0;border-bottom:1px solid var(--linea)}
+.campos{grid-column:1/-1;display:flex;gap:8px}
+.campos input[type=text]{flex:1;min-width:0}.campos input[type=number]{width:72px}
+#aviso{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--tinta);color:#fff;padding:12px 20px;border-radius:8px;display:none;max-width:90%}
+#aviso.error{background:var(--cancelado)}

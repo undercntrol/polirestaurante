@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cocina · PoliRestaurante</title><link rel="stylesheet" href="css/estilos.css"></head>
+<body><header><h1>Cocina</h1><a href="index.html">Inicio</a></header>
+<main><div id="cola" class="tickets"></div></main><div id="aviso" role="status"></div>
+<script src="js/api.js"></script>
+<script>
+const COCINA = 2; // usuario "cocina" de los datos de prueba (aún no hay login)
+
+function ticket(p) {
+  const pend = p.estado === 'PENDIENTE';
+  const lineas = p.detalles.map(d => `<div class="linea"><div><strong>${d.cantidad} ×</strong> ${esc(d.productoNombre)}${d.notas ? `<div class="nota">${esc(d.notas)}</div>` : ''}</div></div>`).join('');
+  return `<article class="ticket e-${p.estado}"><div class="cab"><strong>Mesa ${p.mesaNumero}</strong><span class="chip e-${p.estado}">${ETIQ[p.estado]}</span></div>
+<div class="nota">Pedido n.º ${p.id}, de ${esc(p.meseroNombre)}, a las ${hora(p.fechaCreacion)}</div>${lineas}
+<button style="width:100%;margin-top:12px" data-accion="${pend ? 'preparar' : 'listo'}" data-id="${p.id}">${pend ? 'Tomar pedido' : 'Marcar como listo'}</button></article>`;
+}
+async function cargar() {
+  try {
+    const cola = await api('/cocina/pedidos');
+    $('#cola').innerHTML = cola.length ? cola.map(ticket).join('') : '<p class="vacio">No hay pedidos en cola. Cuando un mesero cree uno, aparece aquí.</p>';
+  } catch (err) { aviso(err.message, true); }
+}
+$('#cola').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-accion]'); if (!b) return;
+  try {
+    await api(`/cocina/pedidos/${b.dataset.id}/${b.dataset.accion}`, 'PUT', {usuarioId: COCINA});
+    aviso(b.dataset.accion === 'preparar' ? 'Pedido en preparación' : 'Pedido listo'); cargar();
+  } catch (err) { aviso(err.message, true); }
+});
+cargar(); setInterval(cargar, 5000);
+</script></body></html>
