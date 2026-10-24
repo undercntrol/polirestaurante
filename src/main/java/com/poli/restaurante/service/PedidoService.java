@@ -236,12 +236,12 @@ public class PedidoService {
                 .orElseThrow(() -> new NoEncontradoException("Pedido no encontrado: " + id));
     }
 
-    Mesero buscarMesero(Long id) {
+    private Mesero buscarMesero(Long id) {
         return exigirActivo(meseroRepository.findById(id)
                 .orElseThrow(() -> new NoEncontradoException("Mesero no encontrado: " + id)));
     }
 
-    Cocina buscarCocina(Long id) {
+    private Cocina buscarCocina(Long id) {
         return exigirActivo(cocinaRepository.findById(id)
                 .orElseThrow(() -> new NoEncontradoException("Usuario de cocina no encontrado: " + id)));
     }

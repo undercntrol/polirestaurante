@@ -2,7 +2,8 @@
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cocina · PoliRestaurante</title><link rel="stylesheet" href="css/estilos.css"></head>
 <body><header><h1>Cocina</h1><a href="index.html">Inicio</a></header>
-<main><div id="cola" class="tickets"></div></main><div id="aviso" role="status"></div>
+<main><div id="cola" class="tickets"></div>
+<section><h2>Disponibilidad de productos</h2><div id="productos"></div></section></main><div id="aviso" role="status"></div>
 <script src="js/api.js"></script>
 <script>
 const COCINA = 1; // id en la tabla cocina del usuario "cocina" de los datos de prueba (aún no hay login)
@@ -27,5 +28,19 @@ $('#cola').addEventListener('click', async e => {
     aviso(b.dataset.accion === 'preparar' ? 'Pedido en preparación' : 'Pedido listo'); cargar();
   } catch (err) { aviso(err.message, true); }
 });
-cargar(); setInterval(cargar, 5000);
+async function cargarProductos() {
+  try {
+    const productos = await api('/cocina/productos');
+    $('#productos').innerHTML = productos.map(p => `<div class="linea"><div><strong>${esc(p.nombre)}</strong><div class="nota">${esc(p.categoria)} · ${p.disponible ? 'disponible' : 'agotado'}</div></div><button class="claro" data-producto="${p.id}" data-disponible="${!p.disponible}">${p.disponible ? 'Marcar agotado' : 'Reactivar'}</button></div>`).join('');
+  } catch (err) { aviso(err.message, true); }
+}
+$('#productos').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-producto]'); if (!b) return;
+  const disponible = b.dataset.disponible === 'true';
+  try {
+    await api(`/cocina/productos/${b.dataset.producto}/disponibilidad`, 'PUT', {disponible, cocinaId: COCINA});
+    aviso(disponible ? 'Producto disponible de nuevo' : 'Producto marcado como agotado'); cargarProductos();
+  } catch (err) { aviso(err.message, true); }
+});
+cargar(); cargarProductos(); setInterval(cargar, 5000);
 </script></body></html>

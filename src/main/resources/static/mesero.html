@@ -43,7 +43,7 @@ function pintar() {
 
 $('#mesas').addEventListener('click', async e => {
   const b = e.target.closest('.mesa'); if (!b) return;
-  try { mostrar(await api('/pedidos', 'POST', {mesaId: +b.dataset.id, meseroId: MESERO, tipoPedido: 'EN_SITIO'})); aviso('Pedido creado'); cargarMesas(); }
+  try { menu = await api('/menu'); mostrar(await api('/pedidos', 'POST', {mesaId: +b.dataset.id, meseroId: MESERO, tipoPedido: 'EN_SITIO'})); aviso('Pedido creado'); cargarMesas(); }
   catch (err) { aviso(err.message, true); }
 });
 $('#activos').addEventListener('click', async e => {
@@ -51,7 +51,7 @@ $('#activos').addEventListener('click', async e => {
   try { mostrar(await api('/pedidos/' + b.dataset.ver)); } catch (err) { aviso(err.message, true); }
 });
 $('#llevar').onclick = async () => {
-  try { mostrar(await api('/pedidos', 'POST', {meseroId: MESERO, tipoPedido: 'PARA_LLEVAR'})); aviso('Pedido para llevar creado'); cargarActivos(); }
+  try { menu = await api('/menu'); mostrar(await api('/pedidos', 'POST', {meseroId: MESERO, tipoPedido: 'PARA_LLEVAR'})); aviso('Pedido para llevar creado'); cargarActivos(); }
   catch (err) { aviso(err.message, true); }
 };
 $('#panel').addEventListener('click', async e => {

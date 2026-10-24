@@ -24,6 +24,7 @@ import java.util.List;
 public class PedidoFacade {
 
     private final PedidoService pedidoService;
+    private final ProductoService productoService;
     private final PedidoRepository pedidoRepository;
     private final ProductoRepository productoRepository;
     private final MesaRepository mesaRepository;
@@ -73,6 +74,18 @@ public class PedidoFacade {
     @Transactional(readOnly = true)
     public List<PedidoResponse> cola() {
         return pedidoService.colaDeCocina().stream().map(PedidoResponse::de).toList();
+    }
+
+    /** HU-09 */
+    @Transactional(readOnly = true)
+    public List<ProductoResponse> productosParaCocina() {
+        return productoService.todos().stream().map(ProductoResponse::de).toList();
+    }
+
+    /** HU-09 */
+    @Transactional
+    public ProductoResponse cambiarDisponibilidad(Long productoId, DisponibilidadRequest req) {
+        return ProductoResponse.de(productoService.cambiarDisponibilidad(productoId, req.disponible(), req.cocinaId()));
     }
 
     // ----- Cambios de estado -----
