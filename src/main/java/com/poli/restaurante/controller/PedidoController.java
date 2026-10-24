@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/** HU-01, HU-02, HU-05, HU-06 y HU-07: lo que hace el mesero sobre un pedido. */
+import java.util.List;
+
+/** HU-01, HU-02, HU-05, HU-06, HU-07 y HU-08: lo que hace el mesero sobre un pedido. */
 @RestController
 @RequestMapping("/api/pedidos")
 @RequiredArgsConstructor
@@ -21,6 +23,12 @@ public class PedidoController {
     @PostMapping
     public ResponseEntity<PedidoResponse> crear(@Valid @RequestBody CrearPedidoRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(facade.crear(req));
+    }
+
+    /** HU-08: pedidos activos del mesero (ni entregados ni cancelados). Ej.: GET /api/pedidos/activos?meseroId=1 */
+    @GetMapping("/activos")
+    public List<PedidoResponse> activos(@RequestParam Long meseroId) {
+        return facade.activosDelMesero(meseroId);
     }
 
     @GetMapping("/{id}")

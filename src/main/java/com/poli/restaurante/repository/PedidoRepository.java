@@ -13,8 +13,8 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     /** Cola de cocina: del más antiguo al más reciente. */
     List<Pedido> findByEstadoInOrderByFechaCreacionAsc(Collection<EstadoPedido> estados);
 
-    /** Pedidos activos de un mesero. */
-    List<Pedido> findByMeseroIdAndEstadoIn(Long meseroId, Collection<EstadoPedido> estados);
+    /** HU-08: pedidos activos de un mesero, del más antiguo al más reciente. */
+    List<Pedido> findByMeseroIdAndEstadoInOrderByFechaCreacionAsc(Long meseroId, Collection<EstadoPedido> estados);
 
     Optional<Pedido> findFirstByMesaIdAndEstadoIn(Long mesaId, Collection<EstadoPedido> estados);
 

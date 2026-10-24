@@ -136,9 +136,11 @@ public class PedidoService {
         return pedido;
     }
 
+    /** HU-08: solo los pedidos que creó este mesero y que no están entregados ni cancelados. */
     @Transactional(readOnly = true)
     public List<Pedido> pedidosActivosDelMesero(Long meseroId) {
-        return pedidoRepository.findByMeseroIdAndEstadoIn(meseroId, ACTIVOS);
+        buscarMesero(meseroId);
+        return pedidoRepository.findByMeseroIdAndEstadoInOrderByFechaCreacionAsc(meseroId, ACTIVOS);
     }
 
     // ---------- Cocina ----------

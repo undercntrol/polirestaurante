@@ -62,6 +62,12 @@ public class PedidoFacade {
         return PedidoResponse.de(pedido);
     }
 
+    /** HU-08 */
+    @Transactional(readOnly = true)
+    public List<PedidoResponse> activosDelMesero(Long meseroId) {
+        return pedidoService.pedidosActivosDelMesero(meseroId).stream().map(PedidoResponse::de).toList();
+    }
+
     // ----- Cocina -----
 
     @Transactional(readOnly = true)

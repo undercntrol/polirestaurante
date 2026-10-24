@@ -5,6 +5,7 @@
 <main class="dos">
 <section><h2>Mesas</h2><div id="mesas" class="mesas"></div>
 <button class="claro" id="llevar" style="width:100%;margin-top:10px">Nuevo pedido para llevar</button>
+<h2 style="margin-top:22px">Mis pedidos activos</h2><div id="activos"></div>
 <h2 style="margin-top:22px">Abrir un pedido</h2>
 <div class="campos"><input id="nroPedido" type="number" min="1" placeholder="Número de pedido"><button class="claro" id="abrir">Abrir</button></div></section>
 <section id="panel"><p class="vacio">Elige una mesa libre para crear un pedido.</p></section>
@@ -14,7 +15,14 @@
 const MESERO = 1; // id en la tabla mesero del usuario "mesero" de los datos de prueba (aún no hay login)
 let pedido = null, menu = [], metodos = [];
 
+async function cargarActivos() {
+  const activos = await api('/pedidos/activos?meseroId=' + MESERO);
+  $('#activos').innerHTML = activos.length
+    ? activos.map(p => `<button class="claro" data-ver="${p.id}" style="width:100%;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><span>${lugar(p)} · n.º ${p.id}</span><span class="chip e-${p.estado}">${p.estado === 'LISTO' ? 'Listo para recoger' : ETIQ[p.estado]}</span></button>`).join('')
+    : '<p class="vacio">No tienes pedidos activos.</p>';
+}
 async function cargarMesas() {
+  cargarActivos().catch(err => aviso(err.message, true));
   const mesas = await api('/mesas');
   $('#mesas').innerHTML = mesas.map(m => `<button class="mesa ${m.estado.toLowerCase()}" data-id="${m.id}" ${m.estado === 'OCUPADA' ? 'disabled' : ''}>Mesa ${m.numero}<br><small>${m.estado === 'LIBRE' ? 'libre' : 'ocupada'}</small></button>`).join('');
 }
@@ -38,8 +46,12 @@ $('#mesas').addEventListener('click', async e => {
   try { mostrar(await api('/pedidos', 'POST', {mesaId: +b.dataset.id, meseroId: MESERO, tipoPedido: 'EN_SITIO'})); aviso('Pedido creado'); cargarMesas(); }
   catch (err) { aviso(err.message, true); }
 });
+$('#activos').addEventListener('click', async e => {
+  const b = e.target.closest('[data-ver]'); if (!b) return;
+  try { mostrar(await api('/pedidos/' + b.dataset.ver)); } catch (err) { aviso(err.message, true); }
+});
 $('#llevar').onclick = async () => {
-  try { mostrar(await api('/pedidos', 'POST', {meseroId: MESERO, tipoPedido: 'PARA_LLEVAR'})); aviso('Pedido para llevar creado'); }
+  try { mostrar(await api('/pedidos', 'POST', {meseroId: MESERO, tipoPedido: 'PARA_LLEVAR'})); aviso('Pedido para llevar creado'); cargarActivos(); }
   catch (err) { aviso(err.message, true); }
 };
 $('#panel').addEventListener('click', async e => {
@@ -65,6 +77,7 @@ $('#abrir').onclick = async () => {
 };
 // Si cocina cambia el estado, se refleja solo (cada 5 s)
 setInterval(async () => {
+  cargarActivos().catch(() => {});
   if (!pedido) return;
   try { const p = await api('/pedidos/' + pedido.id); if (p.estado !== pedido.estado) { mostrar(p); cargarMesas(); } } catch (e) {}
 }, 5000);
