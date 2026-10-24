@@ -4,9 +4,9 @@ const ETIQ = {PENDIENTE:'Pendiente', EN_PREPARACION:'En preparación', LISTO:'Li
 const $ = s => document.querySelector(s);
 const lugar = p => p.mesaNumero ? 'Mesa ' + p.mesaNumero : 'Para llevar';
 
-async function api(ruta, metodo = 'GET', cuerpo) {
+async function api(ruta, metodo = 'GET', cuerpo, cabeceras = {}) {
   const r = await fetch(API + '/api' + ruta, {
-    method: metodo, headers: {'Content-Type': 'application/json'},
+    method: metodo, headers: {'Content-Type': 'application/json', ...cabeceras},
     body: cuerpo ? JSON.stringify(cuerpo) : undefined});
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(d.error || 'Error ' + r.status);

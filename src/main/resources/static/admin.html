@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Administración · PoliRestaurante</title><link rel="stylesheet" href="css/estilos.css"></head>
+<body><header><h1>Administración</h1><a href="index.html">Inicio</a></header>
+<main>
+<nav class="pestanas" id="pestanas">
+  <button class="claro activa" data-p="productos">Productos</button>
+  <button class="claro" data-p="categorias">Categorías</button>
+  <button class="claro" data-p="mesas">Mesas</button>
+  <button class="claro" data-p="usuarios">Usuarios</button>
+  <button class="claro" data-p="reportes">Reportes</button>
+</nav>
+<section id="vista"></section>
+</main><div id="aviso" role="status"></div>
+<script src="js/api.js"></script>
+<script>
+const ADMIN = 1; // id en la tabla administrador del usuario "admin" de los datos de prueba (aún no hay login en pantalla)
+const adm = (ruta, metodo, cuerpo) => api('/admin' + ruta, metodo, cuerpo, {'X-Administrador-Id': ADMIN});
+let actual = 'productos', categorias = [], editando = null;
+
+const vistas = {
+  // HU-11
+  async productos() {
+    const [productos, cats] = await Promise.all([adm('/productos'), adm('/categorias')]);
+    categorias = cats;
+    const p = editando || {nombre: '', descripcion: '', precio: '', categoriaId: cats[0]?.id, disponible: true};
+    return `<h2>Productos</h2><table><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Estado</th><th></th></tr>
+${productos.map(x => `<tr class="${x.disponible ? '' : 'inactivo'}"><td><strong>${esc(x.nombre)}</strong><div class="nota">${esc(x.descripcion || '')}</div></td><td>${esc(x.categoria)}</td><td>${pesos(x.precio)}</td><td>${x.disponible ? 'Disponible' : 'No disponible'}</td>
+<td><div class="acciones"><button class="claro" data-editar="${esc(JSON.stringify(x))}">Editar</button><button class="claro" data-eliminar-producto="${x.id}">Eliminar</button></div></td></tr>`).join('')}</table>
+<h2 style="margin-top:20px">${editando ? 'Editar producto n.º ' + editando.id : 'Nuevo producto'}</h2>
+<div class="form"><input id="pNombre" placeholder="Nombre" value="${esc(p.nombre)}"><input id="pDesc" placeholder="Descripción" value="${esc(p.descripcion || '')}">
+<input id="pPrecio" type="number" min="1" placeholder="Precio" value="${p.precio}"><select id="pCat">${cats.map(c => `<option value="${c.id}" ${c.id === p.categoriaId ? 'selected' : ''}>${esc(c.nombre)}</option>`).join('')}</select>
+<label><input id="pDisp" type="checkbox" ${p.disponible ? 'checked' : ''} style="width:auto;min-height:auto"> Disponible</label>
+<button id="guardarProducto">${editando ? 'Guardar cambios' : 'Crear producto'}</button>${editando ? '<button class="claro" id="cancelarEdicion">Cancelar</button>' : ''}</div>`;
+  },
+  // HU-12
+  async categorias() {
+    const cats = await adm('/categorias');
+    return `<h2>Categorías</h2><table><tr><th>Nombre</th><th>Productos</th><th></th></tr>
+${cats.map(c => `<tr><td><input value="${esc(c.nombre)}" id="cat${c.id}" aria-label="Nombre"></td><td>${c.cantidadProductos}</td>
+<td><div class="acciones"><button class="claro" data-renombrar="${c.id}">Guardar</button><button class="claro" data-eliminar-categoria="${c.id}">Eliminar</button></div></td></tr>`).join('')}</table>
+<div class="form"><input id="nuevaCat" placeholder="Nueva categoría (ej. Postres)"><button id="crearCategoria">Crear categoría</button></div>`;
+  },
+  // HU-13
+  async mesas() {
+    const mesas = await adm('/mesas');
+    return `<h2>Mesas</h2><table><tr><th>Número</th><th>Estado</th><th></th></tr>
+${mesas.map(m => `<tr><td><input type="number" min="1" value="${m.numero}" id="mesa${m.id}" aria-label="Número" style="max-width:120px"></td><td>${m.estado === 'LIBRE' ? 'Libre' : 'Ocupada'}</td>
+<td><div class="acciones"><button class="claro" data-numero="${m.id}">Guardar</button><button class="claro" data-eliminar-mesa="${m.id}">Eliminar</button></div></td></tr>`).join('')}</table>
+<div class="form"><input id="nuevaMesa" type="number" min="1" placeholder="Número de la mesa nueva"><button id="crearMesa">Agregar mesa</button></div>`;
+  },
+  // HU-14
+  async usuarios() {
+    const usuarios = await adm('/usuarios');
+    const ROL = {MESERO: 'Mesero', COCINA: 'Cocina', ADMINISTRADOR: 'Administrador'};
+    return `<h2>Usuarios</h2><table><tr><th>Rol</th><th>Nombre</th><th>Usuario</th><th>Estado</th><th></th></tr>
+${usuarios.map(u => `<tr class="${u.activo ? '' : 'inactivo'}"><td>${ROL[u.rol]}</td><td>${esc(u.nombre)}</td><td>${esc(u.username)}</td><td>${u.activo ? 'Activo' : 'Inactivo'}</td>
+<td><div class="acciones"><button class="claro" data-estado="${u.rol}/${u.id}" data-activo="${!u.activo}">${u.activo ? 'Desactivar' : 'Activar'}</button></div></td></tr>`).join('')}</table>
+<h2 style="margin-top:20px">Nuevo usuario</h2>
+<div class="form"><input id="uNombre" placeholder="Nombre completo"><input id="uUser" placeholder="Usuario"><input id="uPass" type="password" placeholder="Contraseña (mín. 4)">
+<select id="uRol"><option value="MESERO">Mesero</option><option value="COCINA">Cocina</option><option value="ADMINISTRADOR">Administrador</option></select>
+<button id="crearUsuario">Crear usuario</button></div>`;
+  },
+  // HU-15
+  async reportes() {
+    const hoy = new Date(), iso = d => d.toLocaleDateString('en-CA');
+    const desde = $('#rDesde')?.value || iso(new Date(hoy.getFullYear(), hoy.getMonth(), 1)), hasta = $('#rHasta')?.value || iso(hoy);
+    const q = `?desde=${desde}&hasta=${hasta}`;
+    const [v, t] = await Promise.all([adm('/reportes/ventas' + q), adm('/reportes/tiempos' + q)]);
+    const min = x => x == null ? '—' : x + ' min';
+    return `<h2>Reportes</h2><div class="form"><label>Desde <input id="rDesde" type="date" value="${desde}"></label><label>Hasta <input id="rHasta" type="date" value="${hasta}"></label><button id="generar">Generar</button></div>
+${v.mensaje ? `<p class="vacio">${esc(v.mensaje)}</p>` : `<h2 style="margin-top:20px">Ventas</h2><div class="cifras">
+<div class="cifra"><span class="nota">Total vendido</span><strong>${pesos(v.totalVendido)}</strong></div>
+<div class="cifra"><span class="nota">Pedidos entregados</span><strong>${v.numeroPedidos}</strong></div>
+<div class="cifra"><span class="nota">Ticket promedio</span><strong>${pesos(v.ticketPromedio)}</strong></div>
+<div class="cifra"><span class="nota">Cancelados (no suman)</span><strong>${v.pedidosCancelados}</strong></div></div>
+<h2 style="margin-top:20px">Tiempos promedio</h2>${t.mensaje ? `<p class="nota">${esc(t.mensaje)}</p>` : ''}<div class="cifras">
+<div class="cifra"><span class="nota">Pendiente → listo</span><strong>${min(t.promedioPendienteAListo)}</strong></div>
+<div class="cifra"><span class="nota">Espera en cola</span><strong>${min(t.promedioEsperaEnCola)}</strong></div>
+<div class="cifra"><span class="nota">Preparación</span><strong>${min(t.promedioPreparacion)}</strong></div>
+<div class="cifra"><span class="nota">Entrega</span><strong>${min(t.promedioEntrega)}</strong></div></div>
+<p class="nota">Pedidos medidos: ${t.pedidosMedidos}</p>`}`;
+  }
+};
+
+async function mostrar(p) {
+  actual = p || actual;
+  document.querySelectorAll('#pestanas button').forEach(b => b.classList.toggle('activa', b.dataset.p === actual));
+  try { $('#vista').innerHTML = await vistas[actual](); } catch (err) { aviso(err.message, true); }
+}
+$('#pestanas').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) { editando = null; mostrar(b.dataset.p); } });
+
+$('#vista').addEventListener('click', async e => {
+  const t = e.target, d = t.dataset;
+  try {
+    if (t.id === 'guardarProducto') {
+      const cuerpo = {nombre: $('#pNombre').value, descripcion: $('#pDesc').value || null, precio: +$('#pPrecio').value, categoriaId: +$('#pCat').value, disponible: $('#pDisp').checked};
+      if (editando) await adm('/productos/' + editando.id, 'PUT', cuerpo); else await adm('/productos', 'POST', cuerpo);
+      aviso(editando ? 'Producto actualizado' : 'Producto creado'); editando = null;
+    } else if (d.editar) { editando = JSON.parse(d.editar); }
+    else if (t.id === 'cancelarEdicion') { editando = null; }
+    else if (d.eliminarProducto) { if (!confirm('¿Eliminar el producto?')) return; await adm('/productos/' + d.eliminarProducto, 'DELETE'); aviso('Producto eliminado'); }
+    else if (t.id === 'crearCategoria') { await adm('/categorias', 'POST', {nombre: $('#nuevaCat').value}); aviso('Categoría creada'); }
+    else if (d.renombrar) { await adm('/categorias/' + d.renombrar, 'PUT', {nombre: $('#cat' + d.renombrar).value}); aviso('Categoría actualizada'); }
+    else if (d.eliminarCategoria) { if (!confirm('¿Eliminar la categoría?')) return; await adm('/categorias/' + d.eliminarCategoria, 'DELETE'); aviso('Categoría eliminada'); }
+    else if (t.id === 'crearMesa') { await adm('/mesas', 'POST', {numero: +$('#nuevaMesa').value}); aviso('Mesa agregada'); }
+    else if (d.numero) { await adm('/mesas/' + d.numero, 'PUT', {numero: +$('#mesa' + d.numero).value}); aviso('Mesa actualizada'); }
+    else if (d.eliminarMesa) { if (!confirm('¿Eliminar la mesa?')) return; await adm('/mesas/' + d.eliminarMesa, 'DELETE'); aviso('Mesa eliminada'); }
+    else if (t.id === 'crearUsuario') { await adm('/usuarios', 'POST', {nombre: $('#uNombre').value, username: $('#uUser').value, password: $('#uPass').value, rol: $('#uRol').value}); aviso('Usuario creado'); }
+    else if (d.estado) { await adm('/usuarios/' + d.estado + '/estado', 'PUT', {activo: d.activo === 'true'}); aviso(d.activo === 'true' ? 'Cuenta activada' : 'Cuenta desactivada'); }
+    else if (t.id === 'generar') { /* se vuelve a pintar con las fechas elegidas */ }
+    else return;
+    mostrar();
+  } catch (err) { aviso(err.message, true); }
+});
+mostrar();
+</script></body></html>

@@ -35,3 +35,17 @@ input,select{min-height:44px;padding:0 10px;border:1px solid var(--linea);border
 .campos input[type=text]{flex:1;min-width:0}.campos input[type=number]{width:72px}
 #aviso{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--tinta);color:#fff;padding:12px 20px;border-radius:8px;display:none;max-width:90%}
 #aviso.error{background:var(--cancelado)}
+.pestanas{display:flex;gap:8px;flex-wrap:wrap}
+.pestanas button{min-height:40px}
+.pestanas button.activa{background:var(--tinta);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--linea);vertical-align:middle}
+th{color:var(--suave);font-weight:600}
+td input{width:100%}
+.acciones{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.acciones button{min-height:36px;padding:0 12px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:12px;align-items:center}
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:12px}
+.cifra{border:1px solid var(--linea);border-radius:10px;padding:12px}
+.cifra strong{display:block;font-size:1.4rem}
+.inactivo{color:var(--suave)}
