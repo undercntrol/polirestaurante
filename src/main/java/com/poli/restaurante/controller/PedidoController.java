@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/** HU-01, HU-02, HU-05 y HU-06: lo que hace el mesero sobre un pedido. */
+/** HU-01, HU-02, HU-05, HU-06 y HU-07: lo que hace el mesero sobre un pedido. */
 @RestController
 @RequestMapping("/api/pedidos")
 @RequiredArgsConstructor
@@ -44,6 +44,15 @@ public class PedidoController {
     @PutMapping("/{id}/entregar")
     public PedidoResponse entregar(@PathVariable Long id, @Valid @RequestBody MeseroRequest req) {
         return facade.cambiarEstadoPorMesero(id, EstadoPedido.ENTREGADO, req.meseroId());
+    }
+
+    /**
+     * HU-07: cancelar un pedido que no se ha entregado (solo desde PENDIENTE o EN_PREPARACION).
+     * Si era el único pedido activo de la mesa, la mesa queda libre y el pedido sale de la cola de cocina.
+     */
+    @PutMapping("/{id}/cancelar")
+    public PedidoResponse cancelar(@PathVariable Long id, @Valid @RequestBody MeseroRequest req) {
+        return facade.cambiarEstadoPorMesero(id, EstadoPedido.CANCELADO, req.meseroId());
     }
 
     /** HU-06: registrar el método de pago de un pedido entregado. */

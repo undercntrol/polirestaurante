@@ -26,6 +26,7 @@ function pintar() {
   const items = menu.map(m => `<div class="menu-item"><div><strong>${esc(m.nombre)}</strong><div class="nota">${esc(m.categoria)}</div></div><div>${pesos(m.precio)}</div><div class="campos"><input type="number" min="1" value="1" aria-label="Cantidad"><input type="text" placeholder="Notas (ej. sin cebolla)" aria-label="Notas"><button data-agregar="${m.id}">Agregar</button></div></div>`).join('');
   $('#panel').innerHTML = `<h2>${lugar(p)} <span class="chip e-${p.estado}">${ETIQ[p.estado]}</span> <span class="nota">pedido n.º ${p.id}</span></h2>${lineas}<div class="total">Total ${pesos(p.total)}</div>`
     + (p.estado === 'LISTO' ? '<button id="entregar" style="width:100%;margin-top:12px">Marcar como entregado</button>' : '')
+    + (p.estado === 'PENDIENTE' || p.estado === 'EN_PREPARACION' ? '<button id="cancelar" class="claro" style="width:100%;margin-top:12px">Cancelar pedido</button>' : '')
     + (p.estado === 'ENTREGADO' ? (p.estadoPago === 'PAGADO'
         ? `<p class="nota" style="text-align:right">Pagado con ${esc(p.metodoPago)}</p>`
         : `<h2 style="margin-top:20px">Registrar pago</h2><div class="campos"><select id="metodo" aria-label="Método de pago">${metodos.map(m => `<option value="${m.id}">${esc(m.nombre)}</option>`).join('')}</select><button id="pagar">Registrar pago</button></div>`) : '')
@@ -49,6 +50,9 @@ $('#panel').addEventListener('click', async e => {
       mostrar(await api(`/pedidos/${pedido.id}/detalles`, 'POST', {productoId: +t.dataset.agregar, cantidad: +c.children[0].value || 1, notas: c.children[1].value.trim() || null}));
     } else if (t.dataset.quitar) {
       mostrar(await api(`/pedidos/${pedido.id}/detalles/${t.dataset.quitar}`, 'DELETE'));
+    } else if (t.id === 'cancelar') {
+      if (!confirm('¿Cancelar el pedido n.º ' + pedido.id + '?')) return;
+      mostrar(await api(`/pedidos/${pedido.id}/cancelar`, 'PUT', {meseroId: MESERO})); aviso('Pedido cancelado'); cargarMesas();
     } else if (t.id === 'pagar') {
       mostrar(await api(`/pedidos/${pedido.id}/pago`, 'PUT', {metodoPagoId: +$('#metodo').value, meseroId: MESERO})); aviso('Pago registrado');
     } else if (t.id === 'entregar') {
