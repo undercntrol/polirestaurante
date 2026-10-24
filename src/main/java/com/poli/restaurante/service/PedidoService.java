@@ -24,7 +24,8 @@ public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final MesaRepository mesaRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final MeseroRepository meseroRepository;
+    private final CocinaRepository cocinaRepository;
     private final ProductoRepository productoRepository;
     private final HistorialEstadoRepository historialRepository;
 
@@ -33,20 +34,15 @@ public class PedidoService {
     /** HU-01: crea el pedido en PENDIENTE, ocupa la mesa y deja el primer registro del historial. */
     @Transactional
     public Pedido crearPedido(Long mesaId, Long meseroId) {
-        Usuario mesero = buscarUsuario(meseroId);
-        if (mesero.getRol() != Rol.MESERO) {
-            throw new ReglaNegocioException("Solo un mesero puede crear pedidos");
-        }
+        Mesero mesero = buscarMesero(meseroId);
         Mesa mesa = mesaRepository.findById(mesaId)
                 .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada: " + mesaId));
-
         if (mesa.getEstado() == EstadoMesa.OCUPADA) {
             String detalle = pedidoRepository.findFirstByMesaIdAndEstadoIn(mesaId, ACTIVOS)
                     .map(p -> " Pedido activo: " + p.getId())
                     .orElse("");
             throw new ReglaNegocioException("La mesa " + mesa.getNumero() + " ya está ocupada." + detalle);
         }
-
         mesa.setEstado(EstadoMesa.OCUPADA);
 
         Pedido pedido = new Pedido();
@@ -64,7 +60,6 @@ public class PedidoService {
     public Pedido agregarProducto(Long pedidoId, Long productoId, int cantidad, String notas) {
         Pedido pedido = buscarPedido(pedidoId);
         exigirPendiente(pedido, "agregar productos");
-
         if (cantidad < 1) {
             throw new ReglaNegocioException("La cantidad debe ser al menos 1");
         }
@@ -90,7 +85,6 @@ public class PedidoService {
     public Pedido quitarDetalle(Long pedidoId, Long detalleId) {
         Pedido pedido = buscarPedido(pedidoId);
         exigirPendiente(pedido, "quitar productos");
-
         boolean quitado = pedido.getDetalles().removeIf(d -> d.getId().equals(detalleId));
         if (!quitado) {
             throw new NoEncontradoException("El pedido no tiene la línea " + detalleId);
@@ -99,7 +93,7 @@ public class PedidoService {
         return pedido;
     }
 
-    /** HU-03: registra el método de pago al entregar. */
+    /** HU-06: registra el método de pago de un pedido entregado. */
     @Transactional
     public Pedido registrarPago(Long pedidoId, String metodoPago) {
         Pedido pedido = buscarPedido(pedidoId);
@@ -120,32 +114,41 @@ public class PedidoService {
 
     // ---------- Cocina ----------
 
-    /** HU-04: pendientes y en preparación, del más antiguo al más reciente. */
+    /** HU-03: pendientes y en preparación, del más antiguo al más reciente. */
     @Transactional(readOnly = true)
     public List<Pedido> colaDeCocina() {
         return pedidoRepository.findByEstadoInOrderByFechaCreacionAsc(COLA_COCINA);
     }
 
-    // ---------- Cambio de estado (cocina, mesero) ----------
+    // ---------- Cambio de estado ----------
+
+    /** HU-05 y HU-07: cambios de estado que hace el mesero (entregar, cancelar). */
+    @Transactional
+    public Pedido cambiarEstadoPorMesero(Long pedidoId, EstadoPedido destino, Long meseroId) {
+        return cambiarEstado(buscarPedido(pedidoId), destino, buscarMesero(meseroId));
+    }
+
+    /** HU-03 y HU-04: cambios de estado que hace cocina (en preparación, listo). */
+    @Transactional
+    public Pedido cambiarEstadoPorCocina(Long pedidoId, EstadoPedido destino, Long cocinaId) {
+        return cambiarEstado(buscarPedido(pedidoId), destino, buscarCocina(cocinaId));
+    }
+
+    // ---------- Internos ----------
 
     /**
      * Único punto por donde cambia el estado de un pedido.
      * Valida el rol, valida la transición y registra el historial.
      */
-    @Transactional
-    public Pedido cambiarEstado(Long pedidoId, EstadoPedido destino, Long usuarioId) {
-        Pedido pedido = buscarPedido(pedidoId);
-        Usuario usuario = buscarUsuario(usuarioId);
-
-        validarRol(usuario, destino);
-
+    private Pedido cambiarEstado(Pedido pedido, EstadoPedido destino, Usuario actor) {
+        validarRol(actor, destino);
         if (!pedido.getEstado().puedePasarA(destino)) {
-            throw new ReglaNegocioException("No se puede pasar de " + pedido.getEstado() + " a " + destino);
+            throw new ReglaNegocioException("No se puede pasar de " + pedido.getEstado() + " a " + destino
+                    + ". Estado actual: " + pedido.getEstado());
         }
-
         pedido.setEstado(destino);
         pedido.setFechaUltimaActualizacion(LocalDateTime.now());
-        registrarHistorial(pedido, destino, usuario);
+        registrarHistorial(pedido, destino, actor);
 
         if (destino == EstadoPedido.ENTREGADO || destino == EstadoPedido.CANCELADO) {
             liberarMesaSiNoHayActivos(pedido.getMesa());
@@ -153,16 +156,14 @@ public class PedidoService {
         return pedido;
     }
 
-    // ---------- Internos ----------
-
-    private void validarRol(Usuario usuario, EstadoPedido destino) {
+    private void validarRol(Usuario actor, EstadoPedido destino) {
         boolean permitido = switch (destino) {
-            case EN_PREPARACION, LISTO -> usuario.getRol() == Rol.COCINA;
-            case ENTREGADO, CANCELADO -> usuario.getRol() == Rol.MESERO;
+            case EN_PREPARACION, LISTO -> actor.getRol() == Rol.COCINA;
+            case ENTREGADO, CANCELADO -> actor.getRol() == Rol.MESERO;
             case PENDIENTE -> false;
         };
         if (!permitido) {
-            throw new ReglaNegocioException("Un usuario con rol " + usuario.getRol()
+            throw new ReglaNegocioException("Un usuario con rol " + actor.getRol()
                     + " no puede pasar un pedido a " + destino);
         }
     }
@@ -180,12 +181,19 @@ public class PedidoService {
         }
     }
 
-    private void registrarHistorial(Pedido pedido, EstadoPedido estado, Usuario usuario) {
+    /** Guarda quién hizo el cambio en la columna de su tabla (mesero_id o cocina_id). */
+    private void registrarHistorial(Pedido pedido, EstadoPedido estado, Usuario actor) {
         HistorialEstado h = new HistorialEstado();
         h.setPedido(pedido);
         h.setEstado(estado);
-        h.setUsuario(usuario);
         h.setFecha(LocalDateTime.now());
+        if (actor instanceof Mesero mesero) {
+            h.setMesero(mesero);
+        } else if (actor instanceof Cocina cocina) {
+            h.setCocina(cocina);
+        } else {
+            throw new ReglaNegocioException("Un " + actor.getRol() + " no cambia estados de pedidos");
+        }
         historialRepository.save(h);
     }
 
@@ -194,12 +202,20 @@ public class PedidoService {
                 .orElseThrow(() -> new NoEncontradoException("Pedido no encontrado: " + id));
     }
 
-    private Usuario buscarUsuario(Long id) {
-        Usuario u = usuarioRepository.findById(id)
-                .orElseThrow(() -> new NoEncontradoException("Usuario no encontrado: " + id));
-        if (!u.isActivo()) {
+    Mesero buscarMesero(Long id) {
+        return exigirActivo(meseroRepository.findById(id)
+                .orElseThrow(() -> new NoEncontradoException("Mesero no encontrado: " + id)));
+    }
+
+    Cocina buscarCocina(Long id) {
+        return exigirActivo(cocinaRepository.findById(id)
+                .orElseThrow(() -> new NoEncontradoException("Usuario de cocina no encontrado: " + id)));
+    }
+
+    private <T extends Usuario> T exigirActivo(T usuario) {
+        if (!usuario.isActivo()) {
             throw new ReglaNegocioException("La cuenta del usuario está inactiva");
         }
-        return u;
+        return usuario;
     }
 }

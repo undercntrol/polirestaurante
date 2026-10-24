@@ -61,11 +61,16 @@ public class PedidoFacade {
         return pedidoService.colaDeCocina().stream().map(PedidoResponse::de).toList();
     }
 
-    // ----- Cambios de estado (cocina y mesero) -----
+    // ----- Cambios de estado -----
 
     @Transactional
-    public PedidoResponse cambiarEstado(Long pedidoId, EstadoPedido destino, Long usuarioId) {
-        return PedidoResponse.de(pedidoService.cambiarEstado(pedidoId, destino, usuarioId));
+    public PedidoResponse cambiarEstadoPorMesero(Long pedidoId, EstadoPedido destino, Long meseroId) {
+        return PedidoResponse.de(pedidoService.cambiarEstadoPorMesero(pedidoId, destino, meseroId));
+    }
+
+    @Transactional
+    public PedidoResponse cambiarEstadoPorCocina(Long pedidoId, EstadoPedido destino, Long cocinaId) {
+        return PedidoResponse.de(pedidoService.cambiarEstadoPorCocina(pedidoId, destino, cocinaId));
     }
 
     // ----- Consultas de apoyo para el frontend del mesero -----

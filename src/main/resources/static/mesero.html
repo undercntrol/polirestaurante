@@ -10,7 +10,7 @@
 </main><div id="aviso" role="status"></div>
 <script src="js/api.js"></script>
 <script>
-const MESERO = 1; // usuario "mesero" de los datos de prueba (aún no hay login)
+const MESERO = 1; // id en la tabla mesero del usuario "mesero" de los datos de prueba (aún no hay login)
 let pedido = null, menu = [];
 
 async function cargarMesas() {
@@ -42,7 +42,7 @@ $('#panel').addEventListener('click', async e => {
     } else if (t.dataset.quitar) {
       mostrar(await api(`/pedidos/${pedido.id}/detalles/${t.dataset.quitar}`, 'DELETE'));
     } else if (t.id === 'entregar') {
-      mostrar(await api(`/pedidos/${pedido.id}/entregar`, 'PUT', {usuarioId: MESERO})); aviso('Pedido entregado'); cargarMesas();
+      mostrar(await api(`/pedidos/${pedido.id}/entregar`, 'PUT', {meseroId: MESERO})); aviso('Pedido entregado'); cargarMesas();
     }
   } catch (err) { aviso(err.message, true); }
 });

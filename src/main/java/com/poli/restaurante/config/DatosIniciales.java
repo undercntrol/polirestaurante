@@ -9,25 +9,27 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
-/** Datos de prueba para poder usar la API desde el primer arranque. Solo se cargan si no hay usuarios. */
+/** Datos de prueba para poder usar la API desde el primer arranque. Solo se cargan si no hay meseros. */
 @Component
 @RequiredArgsConstructor
 public class DatosIniciales implements CommandLineRunner {
 
-    private final UsuarioRepository usuarios;
+    private final MeseroRepository meseros;
+    private final CocinaRepository cocinas;
+    private final AdministradorRepository administradores;
     private final MesaRepository mesas;
     private final CategoriaRepository categorias;
     private final ProductoRepository productos;
 
     @Override
     public void run(String... args) {
-        if (usuarios.count() > 0) {
+        if (meseros.count() > 0) {
             return;
         }
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        usuarios.save(usuario("Mesero Demo", "mesero", encoder.encode("1234"), Rol.MESERO));
-        usuarios.save(usuario("Cocina Demo", "cocina", encoder.encode("1234"), Rol.COCINA));
-        usuarios.save(usuario("Admin Demo", "admin", encoder.encode("1234"), Rol.ADMINISTRADOR));
+        meseros.save(usuario(new Mesero(), "Mesero Demo", "mesero", encoder.encode("1234")));
+        cocinas.save(usuario(new Cocina(), "Cocina Demo", "cocina", encoder.encode("1234")));
+        administradores.save(usuario(new Administrador(), "Admin Demo", "admin", encoder.encode("1234")));
 
         for (int i = 1; i <= 5; i++) {
             Mesa m = new Mesa();
@@ -43,12 +45,10 @@ public class DatosIniciales implements CommandLineRunner {
         productos.save(producto("Jugo natural", "Del día", "6000", bebidas));
     }
 
-    private Usuario usuario(String nombre, String username, String hash, Rol rol) {
-        Usuario u = new Usuario();
+    private <T extends Usuario> T usuario(T u, String nombre, String username, String hash) {
         u.setNombre(nombre);
         u.setUsername(username);
         u.setPasswordHash(hash);
-        u.setRol(rol);
         return u;
     }
 

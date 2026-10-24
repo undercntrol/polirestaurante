@@ -24,7 +24,12 @@ public class Pedido {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "mesero_id")
-    private Usuario mesero;
+    private Mesero mesero;
+
+    /** Alcance extendido: el pedido puede quedar asociado a un cliente. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

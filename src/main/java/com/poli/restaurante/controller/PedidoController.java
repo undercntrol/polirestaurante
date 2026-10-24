@@ -42,7 +42,7 @@ public class PedidoController {
 
     /** HU-05: marcar como entregado. */
     @PutMapping("/{id}/entregar")
-    public PedidoResponse entregar(@PathVariable Long id, @Valid @RequestBody UsuarioRequest req) {
-        return facade.cambiarEstado(id, EstadoPedido.ENTREGADO, req.usuarioId());
+    public PedidoResponse entregar(@PathVariable Long id, @Valid @RequestBody MeseroRequest req) {
+        return facade.cambiarEstadoPorMesero(id, EstadoPedido.ENTREGADO, req.meseroId());
     }
 }

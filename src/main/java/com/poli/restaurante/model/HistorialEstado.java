@@ -28,7 +28,18 @@ public class HistorialEstado {
     @Column(nullable = false, updatable = false)
     private LocalDateTime fecha;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "usuario_id", updatable = false)
-    private Usuario usuario;
+    // Quién hizo el cambio. Cada actor tiene su tabla, así que hay una columna por actor
+    // y en cada registro se llena exactamente una de ellas.
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mesero_id", updatable = false)
+    private Mesero mesero;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cocina_id", updatable = false)
+    private Cocina cocina;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cliente_id", updatable = false)
+    private Cliente cliente;
 }

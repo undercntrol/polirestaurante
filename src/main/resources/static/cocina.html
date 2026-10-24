@@ -5,7 +5,7 @@
 <main><div id="cola" class="tickets"></div></main><div id="aviso" role="status"></div>
 <script src="js/api.js"></script>
 <script>
-const COCINA = 2; // usuario "cocina" de los datos de prueba (aún no hay login)
+const COCINA = 1; // id en la tabla cocina del usuario "cocina" de los datos de prueba (aún no hay login)
 
 function ticket(p) {
   const pend = p.estado === 'PENDIENTE';
@@ -23,7 +23,7 @@ async function cargar() {
 $('#cola').addEventListener('click', async e => {
   const b = e.target.closest('button[data-accion]'); if (!b) return;
   try {
-    await api(`/cocina/pedidos/${b.dataset.id}/${b.dataset.accion}`, 'PUT', {usuarioId: COCINA});
+    await api(`/cocina/pedidos/${b.dataset.id}/${b.dataset.accion}`, 'PUT', {cocinaId: COCINA});
     aviso(b.dataset.accion === 'preparar' ? 'Pedido en preparación' : 'Pedido listo'); cargar();
   } catch (err) { aviso(err.message, true); }
 });

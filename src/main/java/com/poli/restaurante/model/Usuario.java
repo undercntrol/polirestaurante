@@ -5,10 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "usuario")
+/**
+ * Datos comunes de los actores que inician sesión (mesero, cocina y administrador).
+ * No es una tabla: cada actor tiene la suya, como pide el modelo relacional
+ * (herencia "una tabla por clase concreta").
+ */
+@MappedSuperclass
 @Getter @Setter @NoArgsConstructor
-public class Usuario {
+public abstract class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,10 +27,9 @@ public class Usuario {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Rol rol;
-
     @Column(nullable = false)
     private boolean activo = true;
+
+    /** El rol sale del tipo de actor; no se guarda en la base de datos. */
+    public abstract Rol getRol();
 }
