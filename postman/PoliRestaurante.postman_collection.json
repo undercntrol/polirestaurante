@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "PoliRestaurante API",
-    "description": "Endpoints del backend (Spring Boot). Datos de prueba: mesero id 1, cocina id 1. Cambia la variable pedidoId por el id que devuelva 'Crear pedido'.",
+    "description": "Endpoints del backend (Spring Boot). Datos de prueba: mesero id 1, cocina id 1. Cambia la variable pedidoId por el id que devuelva 'Crear pedido'. Los endpoints de administración llevan la cabecera X-Administrador-Id (admin id 1).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -19,6 +19,10 @@
     },
     {
       "key": "cocinaId",
+      "value": "1"
+    },
+    {
+      "key": "adminId",
       "value": "1"
     }
   ],
@@ -531,6 +535,594 @@
                   "language": "json"
                 }
               }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "RF-11 Iniciar sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"mesero\",\n  \"password\": \"1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Administrador",
+      "item": [
+        {
+          "name": "HU-11 Listar productos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "productos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-11 Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/productos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "productos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Salchipapa\",\n  \"descripcion\": \"Papas, salchicha y salsas\",\n  \"precio\": 15000,\n  \"categoriaId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "HU-11 Editar producto (precio)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/productos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "productos",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Hamburguesa clásica\",\n  \"descripcion\": \"Carne, queso y vegetales\",\n  \"precio\": 20000,\n  \"categoriaId\": 1,\n  \"disponible\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "HU-11 Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/productos/5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "productos",
+                "5"
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-12 Listar categorías",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "categorias"
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-12 Crear categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "categorias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Postres\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "HU-12 Renombrar categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/categorias/3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "categorias",
+                "3"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Postres y helados\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "HU-12 Eliminar categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/categorias/3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "categorias",
+                "3"
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-13 Listar mesas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/mesas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "mesas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-13 Crear mesa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/mesas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "mesas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "HU-13 Cambiar número de mesa",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/mesas/6",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "mesas",
+                "6"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": 7\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "HU-13 Eliminar mesa",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/mesas/6",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "mesas",
+                "6"
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-14 Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "usuarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-14 Crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "usuarios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Laura Gómez\",\n  \"username\": \"laura\",\n  \"password\": \"1234\",\n  \"rol\": \"MESERO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "HU-14 Desactivar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/usuarios/mesero/2/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "usuarios",
+                "mesero",
+                "2",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "HU-14 Activar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/usuarios/mesero/2/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "usuarios",
+                "mesero",
+                "2",
+                "estado"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "HU-15 Reporte de ventas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reportes/ventas?desde=2026-10-01&hasta=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reportes",
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-12-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "HU-15 Reporte de tiempos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Administrador-Id",
+                "value": "{{adminId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reportes/tiempos?desde=2026-10-01&hasta=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reportes",
+                "tiempos"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-12-31"
+                }
+              ]
             }
           }
         }
