@@ -10,7 +10,7 @@ const COCINA = 1; // id en la tabla cocina del usuario "cocina" de los datos de 
 function ticket(p) {
   const pend = p.estado === 'PENDIENTE';
   const lineas = p.detalles.map(d => `<div class="linea"><div><strong>${d.cantidad} ×</strong> ${esc(d.productoNombre)}${d.notas ? `<div class="nota">${esc(d.notas)}</div>` : ''}</div></div>`).join('');
-  return `<article class="ticket e-${p.estado}"><div class="cab"><strong>Mesa ${p.mesaNumero}</strong><span class="chip e-${p.estado}">${ETIQ[p.estado]}</span></div>
+  return `<article class="ticket e-${p.estado}"><div class="cab"><strong>${lugar(p)}</strong><span class="chip e-${p.estado}">${ETIQ[p.estado]}</span></div>
 <div class="nota">Pedido n.º ${p.id}, de ${esc(p.meseroNombre)}, a las ${hora(p.fechaCreacion)}</div>${lineas}
 <button style="width:100%;margin-top:12px" data-accion="${pend ? 'preparar' : 'listo'}" data-id="${p.id}">${pend ? 'Tomar pedido' : 'Marcar como listo'}</button></article>`;
 }

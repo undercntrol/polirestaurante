@@ -30,8 +30,8 @@ public class PedidoFacade {
     // ----- Mesero -----
 
     @Transactional
-    public PedidoResponse crear(Long mesaId, Long meseroId) {
-        return PedidoResponse.de(pedidoService.crearPedido(mesaId, meseroId));
+    public PedidoResponse crear(CrearPedidoRequest req) {
+        return PedidoResponse.de(pedidoService.crearPedido(req.mesaId(), req.meseroId(), req.tipoPedido()));
     }
 
     @Transactional

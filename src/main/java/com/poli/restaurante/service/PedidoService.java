@@ -31,21 +31,36 @@ public class PedidoService {
 
     // ---------- Mesero ----------
 
-    /** HU-01: crea el pedido en PENDIENTE, ocupa la mesa y deja el primer registro del historial. */
+    /**
+     * HU-01: crea el pedido en PENDIENTE y deja el primer registro del historial.
+     * En sitio: exige una mesa libre y la ocupa. Para llevar: no lleva mesa.
+     */
     @Transactional
-    public Pedido crearPedido(Long mesaId, Long meseroId) {
+    public Pedido crearPedido(Long mesaId, Long meseroId, TipoPedido tipo) {
         Mesero mesero = buscarMesero(meseroId);
-        Mesa mesa = mesaRepository.findById(mesaId)
-                .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada: " + mesaId));
-        if (mesa.getEstado() == EstadoMesa.OCUPADA) {
-            String detalle = pedidoRepository.findFirstByMesaIdAndEstadoIn(mesaId, ACTIVOS)
-                    .map(p -> " Pedido activo: " + p.getId())
-                    .orElse("");
-            throw new ReglaNegocioException("La mesa " + mesa.getNumero() + " ya está ocupada." + detalle);
+        if (tipo == null) {
+            tipo = TipoPedido.EN_SITIO;
         }
-        mesa.setEstado(EstadoMesa.OCUPADA);
+        Mesa mesa = null;
+        if (tipo == TipoPedido.EN_SITIO) {
+            if (mesaId == null) {
+                throw new ReglaNegocioException("Un pedido en sitio necesita una mesa");
+            }
+            mesa = mesaRepository.findById(mesaId)
+                    .orElseThrow(() -> new NoEncontradoException("Mesa no encontrada: " + mesaId));
+            if (mesa.getEstado() == EstadoMesa.OCUPADA) {
+                String detalle = pedidoRepository.findFirstByMesaIdAndEstadoIn(mesaId, ACTIVOS)
+                        .map(p -> " Pedido activo: " + p.getId())
+                        .orElse("");
+                throw new ReglaNegocioException("La mesa " + mesa.getNumero() + " ya está ocupada." + detalle);
+            }
+            mesa.setEstado(EstadoMesa.OCUPADA);
+        } else if (mesaId != null) {
+            throw new ReglaNegocioException("Un pedido para llevar no se asigna a una mesa");
+        }
 
         Pedido pedido = new Pedido();
+        pedido.setTipoPedido(tipo);
         pedido.setMesa(mesa);
         pedido.setMesero(mesero);
         pedido.setEstado(EstadoPedido.PENDIENTE);
@@ -176,6 +191,9 @@ public class PedidoService {
     }
 
     private void liberarMesaSiNoHayActivos(Mesa mesa) {
+        if (mesa == null) {
+            return; // pedido para llevar
+        }
         if (!pedidoRepository.existsByMesaIdAndEstadoIn(mesa.getId(), ACTIVOS)) {
             mesa.setEstado(EstadoMesa.LIBRE);
         }

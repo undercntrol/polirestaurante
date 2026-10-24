@@ -18,9 +18,14 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    /** Null cuando el pedido es para llevar. */
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mesa_id")
     private Mesa mesa;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_pedido", nullable = false)
+    private TipoPedido tipoPedido = TipoPedido.EN_SITIO;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "mesero_id")

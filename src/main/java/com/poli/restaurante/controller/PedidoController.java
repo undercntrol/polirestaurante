@@ -20,7 +20,7 @@ public class PedidoController {
     /** HU-01: crear pedido y asignar mesa. */
     @PostMapping
     public ResponseEntity<PedidoResponse> crear(@Valid @RequestBody CrearPedidoRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(facade.crear(req.mesaId(), req.meseroId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(facade.crear(req));
     }
 
     @GetMapping("/{id}")

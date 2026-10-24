@@ -2,6 +2,7 @@
 const API = '';
 const ETIQ = {PENDIENTE:'Pendiente', EN_PREPARACION:'En preparación', LISTO:'Listo', ENTREGADO:'Entregado', CANCELADO:'Cancelado'};
 const $ = s => document.querySelector(s);
+const lugar = p => p.mesaNumero ? 'Mesa ' + p.mesaNumero : 'Para llevar';
 
 async function api(ruta, metodo = 'GET', cuerpo) {
   const r = await fetch(API + '/api' + ruta, {
