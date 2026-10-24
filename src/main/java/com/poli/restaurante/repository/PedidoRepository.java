@@ -19,4 +19,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     Optional<Pedido> findFirstByMesaIdAndEstadoIn(Long mesaId, Collection<EstadoPedido> estados);
 
     boolean existsByMesaIdAndEstadoIn(Long mesaId, Collection<EstadoPedido> estados);
+
+    /** HU-13: una mesa con pedidos en el historial no se borra. */
+    boolean existsByMesaId(Long mesaId);
 }

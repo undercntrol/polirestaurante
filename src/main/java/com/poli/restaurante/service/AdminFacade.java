@@ -18,6 +18,7 @@ public class AdminFacade {
     private final AccesoService acceso;
     private final ProductoService productoService;
     private final CategoriaService categoriaService;
+    private final MesaService mesaService;
 
     // ----- HU-11: productos -----
 
@@ -72,5 +73,31 @@ public class AdminFacade {
     public void eliminarCategoria(Long adminId, Long categoriaId) {
         acceso.exigirAdministrador(adminId);
         categoriaService.eliminar(categoriaId);
+    }
+
+    // ----- HU-13: mesas -----
+
+    @Transactional(readOnly = true)
+    public List<MesaResponse> mesas(Long adminId) {
+        acceso.exigirAdministrador(adminId);
+        return mesaService.todas().stream().map(MesaResponse::de).toList();
+    }
+
+    @Transactional
+    public MesaResponse crearMesa(Long adminId, MesaRequest req) {
+        acceso.exigirAdministrador(adminId);
+        return MesaResponse.de(mesaService.crear(req.numero()));
+    }
+
+    @Transactional
+    public MesaResponse cambiarNumeroMesa(Long adminId, Long mesaId, MesaRequest req) {
+        acceso.exigirAdministrador(adminId);
+        return MesaResponse.de(mesaService.cambiarNumero(mesaId, req.numero()));
+    }
+
+    @Transactional
+    public void eliminarMesa(Long adminId, Long mesaId) {
+        acceso.exigirAdministrador(adminId);
+        mesaService.eliminar(mesaId);
     }
 }
