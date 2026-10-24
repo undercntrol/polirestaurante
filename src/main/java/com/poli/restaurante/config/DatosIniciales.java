@@ -20,9 +20,11 @@ public class DatosIniciales implements CommandLineRunner {
     private final MesaRepository mesas;
     private final CategoriaRepository categorias;
     private final ProductoRepository productos;
+    private final MetodoPagoRepository metodosPago;
 
     @Override
     public void run(String... args) {
+        cargarMetodosPago();
         if (meseros.count() > 0) {
             return;
         }
@@ -50,6 +52,18 @@ public class DatosIniciales implements CommandLineRunner {
         u.setUsername(username);
         u.setPasswordHash(hash);
         return u;
+    }
+
+    /** Va aparte para que también se carguen en bases de datos que ya tenían usuarios. */
+    private void cargarMetodosPago() {
+        if (metodosPago.count() > 0) {
+            return;
+        }
+        for (String nombre : new String[]{"Efectivo", "Tarjeta débito", "Tarjeta crédito", "Nequi"}) {
+            MetodoPago m = new MetodoPago();
+            m.setNombre(nombre);
+            metodosPago.save(m);
+        }
     }
 
     private Categoria categoria(String nombre) {

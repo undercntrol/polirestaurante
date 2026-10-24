@@ -1,5 +1,6 @@
 package com.poli.restaurante.dto;
 
+import com.poli.restaurante.model.EstadoPago;
 import com.poli.restaurante.model.EstadoPedido;
 import com.poli.restaurante.model.Pedido;
 import com.poli.restaurante.model.TipoPedido;
@@ -19,7 +20,7 @@ public record PedidoResponse(
         LocalDateTime fechaCreacion,
         LocalDateTime fechaUltimaActualizacion,
         String metodoPago,
-        boolean pagado,
+        EstadoPago estadoPago,
         BigDecimal total,
         List<DetalleResponse> detalles) {
 
@@ -32,6 +33,7 @@ public record PedidoResponse(
         return new PedidoResponse(p.getId(), p.getTipoPedido(), mesaId, mesaNumero,
                 p.getMesero().getId(), p.getMesero().getNombre(), p.getEstado(),
                 p.getFechaCreacion(), p.getFechaUltimaActualizacion(),
-                p.getMetodoPago(), p.isPagado(), total, detalles);
+                p.getMetodoPago() == null ? null : p.getMetodoPago().getNombre(), p.getEstadoPago(),
+                total, detalles);
     }
 }

@@ -46,11 +46,14 @@ public class Pedido {
     @Column(name = "fecha_ultima_actualizacion", nullable = false)
     private LocalDateTime fechaUltimaActualizacion;
 
-    @Column(name = "metodo_pago")
-    private String metodoPago;
+    /** HU-06: se llena al registrar el pago, después de entregar. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "metodo_pago_id")
+    private MetodoPago metodoPago;
 
-    @Column(nullable = false)
-    private boolean pagado = false;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado_pago", nullable = false)
+    private EstadoPago estadoPago = EstadoPago.PENDIENTE;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetallePedido> detalles = new ArrayList<>();

@@ -10,12 +10,13 @@ main.dos{grid-template-columns:320px 1fr;align-items:start}
 @media(max-width:800px){main.dos{grid-template-columns:1fr}}
 section{background:var(--papel);border-radius:10px;padding:18px;border:1px solid var(--linea)}
 h2{margin:0 0 12px;font-size:1.15rem}
-button,input{font:inherit}
+button,input,select{font:inherit}
 button{min-height:48px;padding:0 18px;border:0;border-radius:8px;background:var(--tinta);color:#fff;font-weight:600;cursor:pointer}
 button:disabled{background:#c5ccd6;color:#7d8794;cursor:not-allowed}
 button.claro{background:#fff;color:var(--tinta);border:1px solid var(--linea);min-height:40px}
-button:focus-visible,input:focus-visible{outline:3px solid var(--preparacion);outline-offset:2px}
-input{min-height:44px;padding:0 10px;border:1px solid var(--linea);border-radius:8px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--preparacion);outline-offset:2px}
+input,select{min-height:44px;padding:0 10px;border:1px solid var(--linea);border-radius:8px;background:#fff}
+.campos select{flex:1;min-width:0}
 .mesas{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
 .mesa{background:#fff;color:var(--tinta);border:2px solid var(--listo);line-height:1.2;padding:8px}
 .mesa.ocupada{border-color:var(--pendiente);background:#FFF6DD}

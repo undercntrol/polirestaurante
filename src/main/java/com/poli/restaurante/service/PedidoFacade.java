@@ -5,6 +5,7 @@ import com.poli.restaurante.exception.NoEncontradoException;
 import com.poli.restaurante.model.EstadoPedido;
 import com.poli.restaurante.model.Pedido;
 import com.poli.restaurante.repository.MesaRepository;
+import com.poli.restaurante.repository.MetodoPagoRepository;
 import com.poli.restaurante.repository.PedidoRepository;
 import com.poli.restaurante.repository.ProductoRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class PedidoFacade {
     private final PedidoRepository pedidoRepository;
     private final ProductoRepository productoRepository;
     private final MesaRepository mesaRepository;
+    private final MetodoPagoRepository metodoPagoRepository;
 
     // ----- Mesero -----
 
@@ -45,6 +47,12 @@ public class PedidoFacade {
     @Transactional
     public PedidoResponse quitarDetalle(Long pedidoId, Long detalleId) {
         return PedidoResponse.de(pedidoService.quitarDetalle(pedidoId, detalleId));
+    }
+
+    /** HU-06 */
+    @Transactional
+    public PedidoResponse registrarPago(Long pedidoId, RegistrarPagoRequest req) {
+        return PedidoResponse.de(pedidoService.registrarPago(pedidoId, req.metodoPagoId(), req.meseroId()));
     }
 
     @Transactional(readOnly = true)
@@ -78,6 +86,11 @@ public class PedidoFacade {
     @Transactional(readOnly = true)
     public List<ProductoResponse> menu() {
         return productoRepository.findByDisponibleTrue().stream().map(ProductoResponse::de).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MetodoPagoResponse> metodosPago() {
+        return metodoPagoRepository.findByActivoTrueOrderByNombreAsc().stream().map(MetodoPagoResponse::de).toList();
     }
 
     @Transactional(readOnly = true)

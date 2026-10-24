@@ -12,7 +12,7 @@
 <script src="js/api.js"></script>
 <script>
 const MESERO = 1; // id en la tabla mesero del usuario "mesero" de los datos de prueba (aún no hay login)
-let pedido = null, menu = [];
+let pedido = null, menu = [], metodos = [];
 
 async function cargarMesas() {
   const mesas = await api('/mesas');
@@ -26,6 +26,9 @@ function pintar() {
   const items = menu.map(m => `<div class="menu-item"><div><strong>${esc(m.nombre)}</strong><div class="nota">${esc(m.categoria)}</div></div><div>${pesos(m.precio)}</div><div class="campos"><input type="number" min="1" value="1" aria-label="Cantidad"><input type="text" placeholder="Notas (ej. sin cebolla)" aria-label="Notas"><button data-agregar="${m.id}">Agregar</button></div></div>`).join('');
   $('#panel').innerHTML = `<h2>${lugar(p)} <span class="chip e-${p.estado}">${ETIQ[p.estado]}</span> <span class="nota">pedido n.º ${p.id}</span></h2>${lineas}<div class="total">Total ${pesos(p.total)}</div>`
     + (p.estado === 'LISTO' ? '<button id="entregar" style="width:100%;margin-top:12px">Marcar como entregado</button>' : '')
+    + (p.estado === 'ENTREGADO' ? (p.estadoPago === 'PAGADO'
+        ? `<p class="nota" style="text-align:right">Pagado con ${esc(p.metodoPago)}</p>`
+        : `<h2 style="margin-top:20px">Registrar pago</h2><div class="campos"><select id="metodo" aria-label="Método de pago">${metodos.map(m => `<option value="${m.id}">${esc(m.nombre)}</option>`).join('')}</select><button id="pagar">Registrar pago</button></div>`) : '')
     + (edita ? `<h2 style="margin-top:20px">Menú</h2>${items}` : '');
 }
 
@@ -46,6 +49,8 @@ $('#panel').addEventListener('click', async e => {
       mostrar(await api(`/pedidos/${pedido.id}/detalles`, 'POST', {productoId: +t.dataset.agregar, cantidad: +c.children[0].value || 1, notas: c.children[1].value.trim() || null}));
     } else if (t.dataset.quitar) {
       mostrar(await api(`/pedidos/${pedido.id}/detalles/${t.dataset.quitar}`, 'DELETE'));
+    } else if (t.id === 'pagar') {
+      mostrar(await api(`/pedidos/${pedido.id}/pago`, 'PUT', {metodoPagoId: +$('#metodo').value, meseroId: MESERO})); aviso('Pago registrado');
     } else if (t.id === 'entregar') {
       mostrar(await api(`/pedidos/${pedido.id}/entregar`, 'PUT', {meseroId: MESERO})); aviso('Pedido entregado'); cargarMesas();
     }
@@ -62,7 +67,7 @@ setInterval(async () => {
 
 (async () => {
   try {
-    await cargarMesas(); menu = await api('/menu');
+    await cargarMesas(); menu = await api('/menu'); metodos = await api('/metodos-pago');
     const id = localStorage.getItem('pedido');
     if (id) { try { mostrar(await api('/pedidos/' + id)); } catch (e) {} }
   } catch (err) { aviso('No se pudo conectar con el servidor', true); }

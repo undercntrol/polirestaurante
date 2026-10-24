@@ -1,6 +1,7 @@
 package com.poli.restaurante.controller;
 
 import com.poli.restaurante.dto.MesaResponse;
+import com.poli.restaurante.dto.MetodoPagoResponse;
 import com.poli.restaurante.dto.ProductoResponse;
 import com.poli.restaurante.service.PedidoFacade;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,11 @@ public class ConsultaController {
     @GetMapping("/mesas")
     public List<MesaResponse> mesas() {
         return facade.mesas();
+    }
+
+    /** HU-06: métodos de pago activos para elegir al cobrar. */
+    @GetMapping("/metodos-pago")
+    public List<MetodoPagoResponse> metodosPago() {
+        return facade.metodosPago();
     }
 }

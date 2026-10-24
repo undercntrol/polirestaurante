@@ -27,6 +27,7 @@ public class PedidoService {
     private final MeseroRepository meseroRepository;
     private final CocinaRepository cocinaRepository;
     private final ProductoRepository productoRepository;
+    private final MetodoPagoRepository metodoPagoRepository;
     private final HistorialEstadoRepository historialRepository;
 
     // ---------- Mesero ----------
@@ -108,16 +109,29 @@ public class PedidoService {
         return pedido;
     }
 
-    /** HU-06: registra el método de pago de un pedido entregado. */
+    /**
+     * HU-06: asocia el método de pago a un pedido entregado y lo marca como PAGADO.
+     * Se rechaza si el pedido no está entregado, si ya se pagó o si el método está inactivo.
+     */
     @Transactional
-    public Pedido registrarPago(Long pedidoId, String metodoPago) {
+    public Pedido registrarPago(Long pedidoId, Long metodoPagoId, Long meseroId) {
+        buscarMesero(meseroId);
         Pedido pedido = buscarPedido(pedidoId);
         if (pedido.getEstado() != EstadoPedido.ENTREGADO) {
             throw new ReglaNegocioException("Solo se registra el pago de pedidos entregados. Estado actual: "
                     + pedido.getEstado());
         }
-        pedido.setMetodoPago(metodoPago);
-        pedido.setPagado(true);
+        if (pedido.getEstadoPago() == EstadoPago.PAGADO) {
+            throw new ReglaNegocioException("El pedido " + pedidoId + " ya está pagado con "
+                    + pedido.getMetodoPago().getNombre());
+        }
+        MetodoPago metodo = metodoPagoRepository.findById(metodoPagoId)
+                .orElseThrow(() -> new NoEncontradoException("Método de pago no encontrado: " + metodoPagoId));
+        if (!metodo.isActivo()) {
+            throw new ReglaNegocioException("El método de pago '" + metodo.getNombre() + "' no está activo");
+        }
+        pedido.setMetodoPago(metodo);
+        pedido.setEstadoPago(EstadoPago.PAGADO);
         pedido.setFechaUltimaActualizacion(LocalDateTime.now());
         return pedido;
     }

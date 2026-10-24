@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/** HU-01, HU-02 y HU-05: lo que hace el mesero sobre un pedido. */
+/** HU-01, HU-02, HU-05 y HU-06: lo que hace el mesero sobre un pedido. */
 @RestController
 @RequestMapping("/api/pedidos")
 @RequiredArgsConstructor
@@ -44,5 +44,11 @@ public class PedidoController {
     @PutMapping("/{id}/entregar")
     public PedidoResponse entregar(@PathVariable Long id, @Valid @RequestBody MeseroRequest req) {
         return facade.cambiarEstadoPorMesero(id, EstadoPedido.ENTREGADO, req.meseroId());
+    }
+
+    /** HU-06: registrar el método de pago de un pedido entregado. */
+    @PutMapping("/{id}/pago")
+    public PedidoResponse registrarPago(@PathVariable Long id, @Valid @RequestBody RegistrarPagoRequest req) {
+        return facade.registrarPago(id, req);
     }
 }
