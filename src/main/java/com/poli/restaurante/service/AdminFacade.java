@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -21,6 +22,7 @@ public class AdminFacade {
     private final CategoriaService categoriaService;
     private final MesaService mesaService;
     private final UsuarioService usuarioService;
+    private final ReporteService reporteService;
 
     // ----- HU-11: productos -----
 
@@ -121,5 +123,19 @@ public class AdminFacade {
     public UsuarioResponse cambiarEstadoUsuario(Long adminId, Rol rol, Long usuarioId, boolean activo) {
         acceso.exigirAdministrador(adminId);
         return UsuarioResponse.de(usuarioService.cambiarEstado(rol, usuarioId, activo, adminId));
+    }
+
+    // ----- HU-15: reportes -----
+
+    @Transactional(readOnly = true)
+    public ReporteVentasResponse reporteVentas(Long adminId, LocalDate desde, LocalDate hasta) {
+        acceso.exigirAdministrador(adminId);
+        return reporteService.ventas(desde, hasta);
+    }
+
+    @Transactional(readOnly = true)
+    public ReporteTiemposResponse reporteTiempos(Long adminId, LocalDate desde, LocalDate hasta) {
+        acceso.exigirAdministrador(adminId);
+        return reporteService.tiempos(desde, hasta);
     }
 }
