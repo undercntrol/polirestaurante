@@ -50,4 +50,10 @@ public class ManejadorErrores {
     public ResponseEntity<Map<String, String>> cuentaInactiva(CuentaInactivaException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
     }
+
+    /** El proveedor de IA no respondió bien: es un error de un servicio externo, no del pedido. */
+    @ExceptionHandler(ServicioIaException.class)
+    public ResponseEntity<Map<String, String>> servicioIa(ServicioIaException e) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("error", e.getMessage()));
+    }
 }

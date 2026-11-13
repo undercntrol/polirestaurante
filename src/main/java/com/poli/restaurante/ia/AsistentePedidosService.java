@@ -1,6 +1,7 @@
 package com.poli.restaurante.ia;
 
 import com.poli.restaurante.exception.ReglaNegocioException;
+import com.poli.restaurante.exception.ServicioIaException;
 import com.poli.restaurante.repository.MesaRepository;
 import com.poli.restaurante.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,11 @@ public class AsistentePedidosService {
         this.mesaRepository = mesaRepository;
     }
 
+    /** Modelo de Gemini configurado (por ejemplo gemini-3.8-flash), o null si no hay. */
+    public String modeloGemini() {
+        return interpretes.get("GEMINI") instanceof InterpreteGemini g ? g.modelo() : null;
+    }
+
     /** Motores registrados y si están listos para usarse. */
     public Map<String, Boolean> motores() {
         Map<String, Boolean> m = new LinkedHashMap<>();
@@ -44,7 +50,11 @@ public class AsistentePedidosService {
 
     public Interpretacion interpretar(String texto, String motor) {
         InterpretePedido interprete = elegir(motor);
-        return revisarMesa(interprete.interpretar(texto, menuDisponible()));
+        try {
+            return revisarMesa(interprete.interpretar(texto, menuDisponible()));
+        } catch (IllegalStateException e) {
+            throw new ServicioIaException(e.getMessage());
+        }
     }
 
     /** Sin motor indicado se usa GEMINI si está configurado; si no, REGLAS. */
