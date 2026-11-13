@@ -4,6 +4,7 @@ import com.poli.restaurante.dto.*;
 import com.poli.restaurante.exception.ReglaNegocioException;
 import com.poli.restaurante.ia.AsistentePedidosService;
 import com.poli.restaurante.ia.ConfirmacionPedidoIaService;
+import com.poli.restaurante.ia.Evaluador;
 import com.poli.restaurante.ia.Interpretacion;
 import com.poli.restaurante.ia.ItemInterpretado;
 import jakarta.validation.Valid;
@@ -59,5 +60,22 @@ public class IaController {
                 .toList();
         PedidoResponse pedido = confirmacion.confirmar(req.meseroId(), i.tipoPedido(), i.mesaNumero(), items);
         return ResponseEntity.status(HttpStatus.CREATED).body(new PedidoIaResponse(i, pedido));
+    }
+
+    /**
+     * Evalúa los motores con el conjunto de prueba y devuelve las métricas (exactitud, precisión,
+     * exhaustividad, F1, latencia) y el detalle de cada frase. Con Gemini tarda unos minutos.
+     * Ej.: POST /api/ia/evaluacion?motor=AMBOS&pausaMs=6000
+     */
+    @PostMapping("/evaluacion")
+    public Map<String, Object> evaluar(@RequestParam(defaultValue = "AMBOS") String motor,
+                                       @RequestParam(defaultValue = "6000") long pausaMs,
+                                       @RequestParam(defaultValue = "0") int maxCasos) {
+        List<Evaluador.Resultado> resultados = asistente.evaluar(motor, pausaMs, maxCasos);
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("modeloGemini", asistente.modeloGemini());
+        r.put("fecha", java.time.LocalDateTime.now().toString());
+        r.put("resultados", resultados);
+        return r;
     }
 }

@@ -1,0 +1,711 @@
+{
+  "descripcion": "Conjunto de prueba del asistente de pedidos: frases dictadas por un mesero y el pedido que deberían producir. Las notas se comparan por sus palabras clave.",
+  "menu": [
+    {
+      "id": 1,
+      "nombre": "Hamburguesa clásica"
+    },
+    {
+      "id": 2,
+      "nombre": "Perro caliente"
+    },
+    {
+      "id": 3,
+      "nombre": "Gaseosa"
+    },
+    {
+      "id": 4,
+      "nombre": "Jugo natural"
+    },
+    {
+      "id": 5,
+      "nombre": "Salchipapa"
+    },
+    {
+      "id": 6,
+      "nombre": "Papas a la francesa"
+    },
+    {
+      "id": 7,
+      "nombre": "Nuggets de pollo"
+    },
+    {
+      "id": 8,
+      "nombre": "Limonada natural"
+    },
+    {
+      "id": 9,
+      "nombre": "Agua"
+    },
+    {
+      "id": 10,
+      "nombre": "Malteada de vainilla"
+    },
+    {
+      "id": 11,
+      "nombre": "Brownie con helado"
+    }
+  ],
+  "casos": [
+    {
+      "categoria": "simple",
+      "texto": "mesa 3: dos hamburguesas y una gaseosa",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 3,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 2,
+          "notas": null
+        },
+        {
+          "producto": "Gaseosa",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "simple",
+      "texto": "Para la mesa 5 un perro caliente y un jugo natural",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 5,
+      "items": [
+        {
+          "producto": "Perro caliente",
+          "cantidad": 1,
+          "notas": null
+        },
+        {
+          "producto": "Jugo natural",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "simple",
+      "texto": "mesa 1, 3 salchipapas",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 1,
+      "items": [
+        {
+          "producto": "Salchipapa",
+          "cantidad": 3,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "simple",
+      "texto": "una limonada natural y unas papas a la francesa para la mesa 2",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 2,
+      "items": [
+        {
+          "producto": "Limonada natural",
+          "cantidad": 1,
+          "notas": null
+        },
+        {
+          "producto": "Papas a la francesa",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "simple",
+      "texto": "mesa 4 cuatro aguas",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 4,
+      "items": [
+        {
+          "producto": "Agua",
+          "cantidad": 4,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "simple",
+      "texto": "mesa 6 un brownie con helado",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 6,
+      "items": [
+        {
+          "producto": "Brownie con helado",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "simple",
+      "texto": "mesa 3 hamburguesa y gaseosa",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 3,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 1,
+          "notas": null
+        },
+        {
+          "producto": "Gaseosa",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "simple",
+      "texto": "MESA 2 DOS HAMBURGUESAS",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 2,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 2,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "simple",
+      "texto": "en la mesa 5 quieren 2 hamburguesas, 2 papas a la francesa y 2 limonadas",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 5,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 2,
+          "notas": null
+        },
+        {
+          "producto": "Papas a la francesa",
+          "cantidad": 2,
+          "notas": null
+        },
+        {
+          "producto": "Limonada natural",
+          "cantidad": 2,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "simple",
+      "texto": "tres limonadas para la mesa 7",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 7,
+      "items": [
+        {
+          "producto": "Limonada natural",
+          "cantidad": 3,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "simple",
+      "texto": "mesa 1 dos malteadas de vainilla y un brownie con helado",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 1,
+      "items": [
+        {
+          "producto": "Malteada de vainilla",
+          "cantidad": 2,
+          "notas": null
+        },
+        {
+          "producto": "Brownie con helado",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "notas",
+      "texto": "mesa 2 dos hamburguesas sin cebolla",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 2,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 2,
+          "notas": "sin cebolla"
+        }
+      ]
+    },
+    {
+      "categoria": "notas",
+      "texto": "mesa 7: una hamburguesa sin tomate y sin cebolla, y una gaseosa",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 7,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 1,
+          "notas": "sin tomate y sin cebolla"
+        },
+        {
+          "producto": "Gaseosa",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "notas",
+      "texto": "mesa 3 un perro caliente con extra queso y una limonada sin hielo",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 3,
+      "items": [
+        {
+          "producto": "Perro caliente",
+          "cantidad": 1,
+          "notas": "extra queso"
+        },
+        {
+          "producto": "Limonada natural",
+          "cantidad": 1,
+          "notas": "sin hielo"
+        }
+      ]
+    },
+    {
+      "categoria": "notas",
+      "texto": "mesa 8 una salchipapa bien tostada",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 8,
+      "items": [
+        {
+          "producto": "Salchipapa",
+          "cantidad": 1,
+          "notas": "bien tostada"
+        }
+      ]
+    },
+    {
+      "categoria": "notas",
+      "texto": "mesa 1, una hamburguesa sin cebolla y otra normal",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 1,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 1,
+          "notas": "sin cebolla"
+        },
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "notas",
+      "texto": "mesa 2 dos jugos naturales, uno sin azúcar",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 2,
+      "items": [
+        {
+          "producto": "Jugo natural",
+          "cantidad": 1,
+          "notas": "sin azucar"
+        },
+        {
+          "producto": "Jugo natural",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "notas",
+      "texto": "mesa 3: 1 perro caliente sin salsa de piña, 1 gaseosa",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 3,
+      "items": [
+        {
+          "producto": "Perro caliente",
+          "cantidad": 1,
+          "notas": "sin salsa de pina"
+        },
+        {
+          "producto": "Gaseosa",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "notas",
+      "texto": "mesa dos, una hamburguesa y un jugo natural sin azúcar",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 2,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 1,
+          "notas": null
+        },
+        {
+          "producto": "Jugo natural",
+          "cantidad": 1,
+          "notas": "sin azucar"
+        }
+      ]
+    },
+    {
+      "categoria": "notas",
+      "texto": "mesa 9 agua sin gas",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 9,
+      "items": [
+        {
+          "producto": "Agua",
+          "cantidad": 1,
+          "notas": "sin gas"
+        }
+      ]
+    },
+    {
+      "categoria": "notas",
+      "texto": "mesa 4 dos salchipapas, una sin salsas",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 4,
+      "items": [
+        {
+          "producto": "Salchipapa",
+          "cantidad": 1,
+          "notas": "sin salsas"
+        },
+        {
+          "producto": "Salchipapa",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "variaciones",
+      "texto": "mesa nueve, tres perros y dos gaseositas",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 9,
+      "items": [
+        {
+          "producto": "Perro caliente",
+          "cantidad": 3,
+          "notas": null
+        },
+        {
+          "producto": "Gaseosa",
+          "cantidad": 2,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "variaciones",
+      "texto": "mesa diez: una malteada y un brownie",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 10,
+      "items": [
+        {
+          "producto": "Malteada de vainilla",
+          "cantidad": 1,
+          "notas": null
+        },
+        {
+          "producto": "Brownie con helado",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "variaciones",
+      "texto": "me regalas para la mesa 4 dos salchipapas porfa",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 4,
+      "items": [
+        {
+          "producto": "Salchipapa",
+          "cantidad": 2,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "variaciones",
+      "texto": "mesa 12 un par de hamburguesas",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 12,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 2,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "variaciones",
+      "texto": "mesa 6 dos amburguesas y una gaseoza",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 6,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 2,
+          "notas": null
+        },
+        {
+          "producto": "Gaseosa",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "variaciones",
+      "texto": "mesa 2 dos clásicas y una gaseosa",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 2,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 2,
+          "notas": null
+        },
+        {
+          "producto": "Gaseosa",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "para llevar",
+      "texto": "dos perros calientes para llevar",
+      "tipoPedido": "PARA_LLEVAR",
+      "mesa": null,
+      "items": [
+        {
+          "producto": "Perro caliente",
+          "cantidad": 2,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "para llevar",
+      "texto": "un jugo natural y una salchipapa para llevar por favor",
+      "tipoPedido": "PARA_LLEVAR",
+      "mesa": null,
+      "items": [
+        {
+          "producto": "Jugo natural",
+          "cantidad": 1,
+          "notas": null
+        },
+        {
+          "producto": "Salchipapa",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "para llevar",
+      "texto": "pedido para llevar: tres aguas",
+      "tipoPedido": "PARA_LLEVAR",
+      "mesa": null,
+      "items": [
+        {
+          "producto": "Agua",
+          "cantidad": 3,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "para llevar",
+      "texto": "es para llevar, una hamburguesa sin salsas",
+      "tipoPedido": "PARA_LLEVAR",
+      "mesa": null,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 1,
+          "notas": "sin salsas"
+        }
+      ]
+    },
+    {
+      "categoria": "para llevar",
+      "texto": "para llevar: dos nuggets de pollo y una malteada de vainilla",
+      "tipoPedido": "PARA_LLEVAR",
+      "mesa": null,
+      "items": [
+        {
+          "producto": "Nuggets de pollo",
+          "cantidad": 2,
+          "notas": null
+        },
+        {
+          "producto": "Malteada de vainilla",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "coloquial",
+      "texto": "mesa 4 una coca cola y un perro",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 4,
+      "items": [
+        {
+          "producto": "Gaseosa",
+          "cantidad": 1,
+          "notas": null
+        },
+        {
+          "producto": "Perro caliente",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "coloquial",
+      "texto": "mesa 7 unas papitas y una limonada",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 7,
+      "items": [
+        {
+          "producto": "Papas a la francesa",
+          "cantidad": 1,
+          "notas": null
+        },
+        {
+          "producto": "Limonada natural",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "coloquial",
+      "texto": "mesa 3 dos perritos",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 3,
+      "items": [
+        {
+          "producto": "Perro caliente",
+          "cantidad": 2,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "coloquial",
+      "texto": "mesa 11 un agüita",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 11,
+      "items": [
+        {
+          "producto": "Agua",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "coloquial",
+      "texto": "mesa 5, unos nuggets y una gaseosa bien fría",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 5,
+      "items": [
+        {
+          "producto": "Nuggets de pollo",
+          "cantidad": 1,
+          "notas": null
+        },
+        {
+          "producto": "Gaseosa",
+          "cantidad": 1,
+          "notas": "bien fria"
+        }
+      ]
+    },
+    {
+      "categoria": "fuera del menu",
+      "texto": "mesa 3 una pizza y una gaseosa",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 3,
+      "items": [
+        {
+          "producto": "Gaseosa",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "fuera del menu",
+      "texto": "mesa 8 dos cervezas",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 8,
+      "items": []
+    },
+    {
+      "categoria": "fuera del menu",
+      "texto": "para llevar un sándwich y un jugo natural",
+      "tipoPedido": "PARA_LLEVAR",
+      "mesa": null,
+      "items": [
+        {
+          "producto": "Jugo natural",
+          "cantidad": 1,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "correcciones",
+      "texto": "mesa 4 tres gaseosas, no, mejor dos",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 4,
+      "items": [
+        {
+          "producto": "Gaseosa",
+          "cantidad": 2,
+          "notas": null
+        }
+      ]
+    },
+    {
+      "categoria": "correcciones",
+      "texto": "mesa 6 una hamburguesa, ah y otra hamburguesa sin cebolla",
+      "tipoPedido": "EN_SITIO",
+      "mesa": 6,
+      "items": [
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 1,
+          "notas": null
+        },
+        {
+          "producto": "Hamburguesa clásica",
+          "cantidad": 1,
+          "notas": "sin cebolla"
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,10 @@ import com.poli.restaurante.repository.MesaRepository;
 import com.poli.restaurante.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -82,5 +86,45 @@ public class AsistentePedidosService {
         List<String> advertencias = new ArrayList<>(r.advertencias());
         advertencias.add("La mesa " + r.mesaNumero() + " no existe");
         return new Interpretacion(r.motor(), r.tipoPedido(), r.mesaNumero(), r.items(), advertencias, r.milisegundos());
+    }
+
+    // ---------- Evaluación (para el artículo) ----------
+
+    /**
+     * Pasa el conjunto de prueba (resources/ia/casos-prueba.json) por uno o por todos los motores.
+     * El conjunto trae su propio menú, así que el resultado no depende de lo que haya en la base de datos.
+     *
+     * @param motor    REGLAS, GEMINI o AMBOS (por defecto AMBOS; si Gemini no tiene clave, solo REGLAS)
+     * @param pausaMs  espera entre frases para Gemini, para no pasar el límite gratuito por minuto
+     * @param maxCasos cuántas frases usar (0 = todas), por si el límite diario es bajo
+     */
+    public List<Evaluador.Resultado> evaluar(String motor, long pausaMs, int maxCasos) {
+        Evaluador.Conjunto conjunto = cargarConjunto();
+        if (maxCasos > 0 && maxCasos < conjunto.casos().size()) {
+            conjunto = new Evaluador.Conjunto(conjunto.menu(), conjunto.casos().subList(0, maxCasos));
+        }
+        List<InterpretePedido> motores = new ArrayList<>();
+        if (motor == null || motor.isBlank() || motor.equalsIgnoreCase("AMBOS")) {
+            interpretes.values().stream().filter(InterpretePedido::disponible).forEach(motores::add);
+        } else {
+            motores.add(elegir(motor));
+        }
+        List<Evaluador.Resultado> resultados = new ArrayList<>();
+        for (InterpretePedido i : motores) {
+            long pausa = i.nombre().equals("REGLAS") ? 0 : Math.max(0, pausaMs);
+            resultados.add(Evaluador.evaluar(i, conjunto, pausa));
+        }
+        return resultados;
+    }
+
+    private Evaluador.Conjunto cargarConjunto() {
+        try (InputStream in = getClass().getResourceAsStream("/ia/casos-prueba.json")) {
+            if (in == null) {
+                throw new IllegalStateException("No se encontró ia/casos-prueba.json en los recursos");
+            }
+            return Evaluador.leerConjunto(new String(in.readAllBytes(), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }
