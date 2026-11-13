@@ -1,13 +1,19 @@
 package com.poli.restaurante.controller;
 
-import com.poli.restaurante.dto.InterpretarRequest;
+import com.poli.restaurante.dto.*;
+import com.poli.restaurante.exception.ReglaNegocioException;
 import com.poli.restaurante.ia.AsistentePedidosService;
+import com.poli.restaurante.ia.ConfirmacionPedidoIaService;
 import com.poli.restaurante.ia.Interpretacion;
+import com.poli.restaurante.ia.ItemInterpretado;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /** Asistente de pedidos en lenguaje natural. */
@@ -17,6 +23,7 @@ import java.util.Map;
 public class IaController {
 
     private final AsistentePedidosService asistente;
+    private final ConfirmacionPedidoIaService confirmacion;
 
     /** Qué motores hay, si están listos y qué modelo de Gemini está configurado. */
     @GetMapping("/estado")
@@ -31,5 +38,26 @@ public class IaController {
     @PostMapping("/interpretar")
     public Interpretacion interpretar(@Valid @RequestBody InterpretarRequest req) {
         return asistente.interpretar(req.texto(), req.motor());
+    }
+
+    /** El mesero revisó la propuesta (y quizá la corrigió): se crea el pedido. */
+    @PostMapping("/pedidos/confirmar")
+    public ResponseEntity<PedidoResponse> confirmar(@Valid @RequestBody ConfirmarPedidoIaRequest req) {
+        PedidoResponse pedido = confirmacion.confirmar(req.meseroId(), req.tipoPedido(), req.mesaNumero(), req.items());
+        return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
+    }
+
+    /** Atajo para Postman: interpreta el texto y crea el pedido de una vez, sin paso de revisión. */
+    @PostMapping("/pedidos")
+    public ResponseEntity<PedidoIaResponse> crearDesdeTexto(@Valid @RequestBody PedidoDesdeTextoRequest req) {
+        Interpretacion i = asistente.interpretar(req.texto(), req.motor());
+        if (i.items().isEmpty()) {
+            throw new ReglaNegocioException("No se pudo armar el pedido: " + String.join("; ", i.advertencias()));
+        }
+        List<ItemConfirmado> items = i.items().stream()
+                .map((ItemInterpretado it) -> new ItemConfirmado(it.productoId(), it.cantidad(), it.notas()))
+                .toList();
+        PedidoResponse pedido = confirmacion.confirmar(req.meseroId(), i.tipoPedido(), i.mesaNumero(), items);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new PedidoIaResponse(i, pedido));
     }
 }
