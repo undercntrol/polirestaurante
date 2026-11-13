@@ -25,9 +25,14 @@ public class DatosIniciales implements CommandLineRunner {
     @Override
     public void run(String... args) {
         cargarMetodosPago();
-        if (meseros.count() > 0) {
-            return;
+        if (meseros.count() == 0) {
+            cargarDatosBase();
         }
+        cargarMenuAmpliado();
+        cargarMesas();
+    }
+
+    private void cargarDatosBase() {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         meseros.save(usuario(new Mesero(), "Mesero Demo", "mesero", encoder.encode("1234")));
         cocinas.save(usuario(new Cocina(), "Cocina Demo", "cocina", encoder.encode("1234")));
@@ -63,6 +68,44 @@ public class DatosIniciales implements CommandLineRunner {
             MetodoPago m = new MetodoPago();
             m.setNombre(nombre);
             metodosPago.save(m);
+        }
+    }
+
+    /**
+     * Menú más completo para el asistente de pedidos con IA. Solo agrega los productos que falten
+     * (por nombre), así que también funciona en bases de datos que ya existían.
+     */
+    private void cargarMenuAmpliado() {
+        String[][] menu = {
+                {"Hamburguesa clásica", "Carne, queso y vegetales", "18000", "Platos fuertes"},
+                {"Perro caliente", "Con papas en fósforo", "12000", "Platos fuertes"},
+                {"Salchipapa", "Papas, salchicha y salsas", "15000", "Platos fuertes"},
+                {"Papas a la francesa", "Porción mediana", "7000", "Entradas"},
+                {"Nuggets de pollo", "Seis unidades", "12000", "Entradas"},
+                {"Gaseosa", "Botella personal", "4000", "Bebidas"},
+                {"Jugo natural", "Del día", "6000", "Bebidas"},
+                {"Limonada natural", "Vaso de 12 onzas", "6000", "Bebidas"},
+                {"Agua", "Botella personal", "3500", "Bebidas"},
+                {"Malteada de vainilla", "Vaso de 12 onzas", "11000", "Postres"},
+                {"Brownie con helado", "Brownie tibio con bola de vainilla", "10500", "Postres"},
+        };
+        for (String[] p : menu) {
+            if (productos.existsByNombreIgnoreCase(p[0])) {
+                continue;
+            }
+            Categoria c = categorias.findByNombreIgnoreCase(p[3]).orElseGet(() -> categoria(p[3]));
+            productos.save(producto(p[0], p[1], p[2], c));
+        }
+    }
+
+    /** Mesas 1 a 12, para poder probar el asistente con frases que mencionan mesas más altas. */
+    private void cargarMesas() {
+        for (int i = 1; i <= 12; i++) {
+            if (!mesas.existsByNumero(i)) {
+                Mesa m = new Mesa();
+                m.setNumero(i);
+                mesas.save(m);
+            }
         }
     }
 
