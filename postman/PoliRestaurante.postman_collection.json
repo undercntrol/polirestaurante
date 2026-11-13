@@ -1127,6 +1127,224 @@
           }
         }
       ]
+    },
+    {
+      "name": "Asistente de pedidos (IA)",
+      "item": [
+        {
+          "name": "Estado de los motores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ia/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ia",
+                "estado"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Interpretar con reglas (sin IA)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ia/interpretar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ia",
+                "interpretar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"mesa 4 una coca cola y dos perritos sin cebolla\",\n  \"motor\": \"REGLAS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Interpretar con Gemini",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ia/interpretar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ia",
+                "interpretar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"mesa 4 una coca cola y dos perritos sin cebolla\",\n  \"motor\": \"GEMINI\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Confirmar pedido propuesto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ia/pedidos/confirmar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ia",
+                "pedidos",
+                "confirmar"
+              ]
+            },
+            "description": "Los productoId deben ser los de tu base de datos (ver GET /menu).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"meseroId\": {{meseroId}},\n  \"tipoPedido\": \"EN_SITIO\",\n  \"mesaNumero\": 4,\n  \"items\": [\n    {\n      \"productoId\": 3,\n      \"cantidad\": 1,\n      \"notas\": null\n    },\n    {\n      \"productoId\": 2,\n      \"cantidad\": 2,\n      \"notas\": \"sin cebolla\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Crear pedido directo desde texto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ia/pedidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ia",
+                "pedidos"
+              ]
+            },
+            "description": "Sin motor usa Gemini si hay clave; si no, reglas.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"para llevar: un par de hamburguesas, una sin tomate, y una limonada\",\n  \"meseroId\": {{meseroId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Evaluar solo reglas",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ia/evaluacion?motor=REGLAS",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ia",
+                "evaluacion"
+              ],
+              "query": [
+                {
+                  "key": "motor",
+                  "value": "REGLAS"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Evaluar ambos motores (tarda unos minutos)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ia/evaluacion?motor=AMBOS&pausaMs=6000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ia",
+                "evaluacion"
+              ],
+              "query": [
+                {
+                  "key": "motor",
+                  "value": "AMBOS"
+                },
+                {
+                  "key": "pausaMs",
+                  "value": "6000"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "\"42 frases. Con Gemini hace una llamada cada 6 s para no pasar el límite gratuito. Guarda la respuesta: son los resultados del artículo.\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   ]
 }
