@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Mesero · PoliRestaurante</title><link rel="stylesheet" href="css/estilos.css"></head>
-<body><header><h1>Mesero</h1><a href="index.html">Inicio</a></header>
+<body><header><h1>Mesero</h1><a href="index.html" id="salir">Cerrar sesión</a></header>
 <main class="dos">
 <section><h2>Mesas</h2><div id="mesas" class="mesas"></div>
 <button class="claro" id="llevar" style="width:100%;margin-top:10px">Nuevo pedido para llevar</button>
@@ -16,11 +16,14 @@
 </main><div id="aviso" role="status"></div>
 <script src="js/api.js"></script>
 <script>
-const MESERO = 1; // id en la tabla mesero del usuario "mesero" de los datos de prueba (aún no hay login)
+exigirSesion('MESERO'); // sin sesión de mesero, vuelve al inicio de sesión
 let pedido = null, menu = [], metodos = [], propuesta = null;
+let vistos = null; // ids de los pedidos activos en la consulta anterior, para notar los que cancela cocina
 
 async function cargarActivos() {
-  const activos = await api('/pedidos/activos?meseroId=' + MESERO);
+  const activos = await api('/pedidos/activos');
+  if (vistos) vistos.filter(id => !activos.some(p => p.id === id)).forEach(avisarSiCocinaCancelo);
+  vistos = activos.map(p => p.id);
   $('#activos').innerHTML = activos.length
     ? activos.map(p => `<button class="claro" data-ver="${p.id}" style="width:100%;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><span>${lugar(p)} · n.º ${p.id}</span><span class="chip e-${p.estado}">${p.estado === 'LISTO' ? 'Listo para recoger' : ETIQ[p.estado]}</span></button>`).join('')
     : '<p class="vacio">No tienes pedidos activos.</p>';
@@ -30,6 +33,17 @@ async function cargarMesas() {
   const mesas = await api('/mesas');
   $('#mesas').innerHTML = mesas.map(m => `<button class="mesa ${m.estado.toLowerCase()}" data-id="${m.id}" ${m.estado === 'OCUPADA' ? 'disabled' : ''}>Mesa ${m.numero}<br><small>${m.estado === 'LIBRE' ? 'libre' : 'ocupada'}</small></button>`).join('');
 }
+/** Un pedido salió de "activos": si fue porque cocina lo canceló, se avisa con el motivo. */
+async function avisarSiCocinaCancelo(id) {
+  try {
+    const p = await api('/pedidos/' + id);
+    if (p.estado === 'CANCELADO' && p.canceladoPor === 'COCINA') {
+      aviso(`Cocina canceló el pedido n.º ${p.id} (${lugar(p)})${p.motivoCancelacion ? ': ' + p.motivoCancelacion : ''}`, true, 10000);
+      if (pedido && pedido.id === p.id) mostrar(p);
+      cargarMesas().catch(() => {});
+    }
+  } catch (e) {}
+}
 function mostrar(p) { pedido = p; localStorage.setItem('pedido', p.id); pintar(); }
 
 function pintar() {
@@ -37,6 +51,7 @@ function pintar() {
   const lineas = p.detalles.length ? p.detalles.map(d => `<div class="linea"><div>${d.cantidad} × ${esc(d.productoNombre)}${d.notas ? `<div class="nota">${esc(d.notas)}</div>` : ''}</div><div>${pesos(d.subtotal)} ${edita ? `<button class="claro" data-quitar="${d.id}">Quitar</button>` : ''}</div></div>`).join('') : '<p class="vacio">Todavía no hay productos. Agrégalos desde el menú.</p>';
   const items = menu.map(m => `<div class="menu-item"><div><strong>${esc(m.nombre)}</strong><div class="nota">${esc(m.categoria)}</div></div><div>${pesos(m.precio)}</div><div class="campos"><input type="number" min="1" value="1" aria-label="Cantidad"><input type="text" placeholder="Notas (ej. sin cebolla)" aria-label="Notas"><button data-agregar="${m.id}">Agregar</button></div></div>`).join('');
   $('#panel').innerHTML = `<h2>${lugar(p)} <span class="chip e-${p.estado}">${ETIQ[p.estado]}</span> <span class="nota">pedido n.º ${p.id}</span></h2>${lineas}<div class="total">Total ${pesos(p.total)}</div>`
+    + (p.estado === 'CANCELADO' ? `<p class="nota" style="color:var(--cancelado)">Cancelado por ${p.canceladoPor === 'COCINA' ? 'cocina' : 'el mesero'}${p.motivoCancelacion ? ': ' + esc(p.motivoCancelacion) : ''}</p>` : '')
     + (p.estado === 'LISTO' ? '<button id="entregar" style="width:100%;margin-top:12px">Marcar como entregado</button>' : '')
     + (p.estado === 'PENDIENTE' || p.estado === 'EN_PREPARACION' ? '<button id="cancelar" class="claro" style="width:100%;margin-top:12px">Cancelar pedido</button>' : '')
     + (p.estado === 'ENTREGADO' ? (p.estadoPago === 'PAGADO'
@@ -48,7 +63,7 @@ function pintar() {
 
 $('#mesas').addEventListener('click', async e => {
   const b = e.target.closest('.mesa'); if (!b) return;
-  try { menu = await api('/menu'); mostrar(await api('/pedidos', 'POST', {mesaId: +b.dataset.id, meseroId: MESERO, tipoPedido: 'EN_SITIO'})); aviso('Pedido creado'); cargarMesas(); }
+  try { menu = await api('/menu'); mostrar(await api('/pedidos', 'POST', {mesaId: +b.dataset.id, tipoPedido: 'EN_SITIO'})); aviso('Pedido creado'); cargarMesas(); }
   catch (err) { aviso(err.message, true); }
 });
 $('#activos').addEventListener('click', async e => {
@@ -76,14 +91,14 @@ $('#iaPropuesta').addEventListener('click', async e => {
   if (e.target.id !== 'iaCrear') return;
   try {
     const p = propuesta;
-    mostrar(await api('/ia/pedidos/confirmar', 'POST', {meseroId: MESERO, tipoPedido: p.tipoPedido, mesaNumero: p.mesaNumero,
+    mostrar(await api('/ia/pedidos/confirmar', 'POST', {tipoPedido: p.tipoPedido, mesaNumero: p.mesaNumero,
       items: p.items.map(i => ({productoId: i.productoId, cantidad: i.cantidad, notas: i.notas}))}));
     aviso('Pedido creado desde el texto'); propuesta = null; pintarPropuesta(); $('#iaTexto').value = ''; cargarMesas();
   } catch (err) { aviso(err.message, true); }
 });
 
 $('#llevar').onclick = async () => {
-  try { menu = await api('/menu'); mostrar(await api('/pedidos', 'POST', {meseroId: MESERO, tipoPedido: 'PARA_LLEVAR'})); aviso('Pedido para llevar creado'); cargarActivos(); }
+  try { menu = await api('/menu'); mostrar(await api('/pedidos', 'POST', {tipoPedido: 'PARA_LLEVAR'})); aviso('Pedido para llevar creado'); cargarActivos(); }
   catch (err) { aviso(err.message, true); }
 };
 $('#panel').addEventListener('click', async e => {
@@ -98,12 +113,13 @@ $('#panel').addEventListener('click', async e => {
       const hist = await api(`/pedidos/${pedido.id}/historial`);
       $('#historial').innerHTML = hist.map(h => `<div class="linea"><div><span class="chip e-${h.estado}">${ETIQ[h.estado]}</span> <span class="nota">por ${esc(h.actorNombre || '—')} (${(h.actorTipo || '').toLowerCase()})</span></div><div class="nota">${new Date(h.fecha).toLocaleString('es-CO')}</div></div>`).join('');
     } else if (t.id === 'cancelar') {
-      if (!confirm('¿Cancelar el pedido n.º ' + pedido.id + '?')) return;
-      mostrar(await api(`/pedidos/${pedido.id}/cancelar`, 'PUT', {meseroId: MESERO})); aviso('Pedido cancelado'); cargarMesas();
+      const motivo = prompt(`¿Cancelar el pedido n.º ${pedido.id}? Puedes escribir el motivo (opcional).`, '');
+      if (motivo === null) return;
+      mostrar(await api(`/pedidos/${pedido.id}/cancelar`, 'PUT', {motivo: motivo.trim() || null})); aviso('Pedido cancelado'); cargarMesas();
     } else if (t.id === 'pagar') {
-      mostrar(await api(`/pedidos/${pedido.id}/pago`, 'PUT', {metodoPagoId: +$('#metodo').value, meseroId: MESERO})); aviso('Pago registrado');
+      mostrar(await api(`/pedidos/${pedido.id}/pago`, 'PUT', {metodoPagoId: +$('#metodo').value})); aviso('Pago registrado');
     } else if (t.id === 'entregar') {
-      mostrar(await api(`/pedidos/${pedido.id}/entregar`, 'PUT', {meseroId: MESERO})); aviso('Pedido entregado'); cargarMesas();
+      mostrar(await api(`/pedidos/${pedido.id}/entregar`, 'PUT')); aviso('Pedido entregado'); cargarMesas();
     }
   } catch (err) { aviso(err.message, true); }
 });

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Administración · PoliRestaurante</title><link rel="stylesheet" href="css/estilos.css"></head>
-<body><header><h1>Administración</h1><a href="index.html">Inicio</a></header>
+<body><header><h1>Administración</h1><a href="index.html" id="salir">Cerrar sesión</a></header>
 <main>
 <nav class="pestanas" id="pestanas">
   <button class="claro activa" data-p="productos">Productos</button>
@@ -14,8 +14,8 @@
 </main><div id="aviso" role="status"></div>
 <script src="js/api.js"></script>
 <script>
-const ADMIN = 1; // id en la tabla administrador del usuario "admin" de los datos de prueba (aún no hay login en pantalla)
-const adm = (ruta, metodo, cuerpo) => api('/admin' + ruta, metodo, cuerpo, {'X-Administrador-Id': ADMIN});
+exigirSesion('ADMINISTRADOR'); // sin sesión de administrador, vuelve al inicio de sesión
+const adm = (ruta, metodo, cuerpo) => api('/admin' + ruta, metodo, cuerpo);
 let actual = 'productos', categorias = [], editando = null;
 
 const vistas = {

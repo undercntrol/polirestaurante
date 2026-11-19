@@ -50,3 +50,6 @@ td input{width:100%}
 .cifra strong{display:block;font-size:1.4rem}
 .inactivo{color:var(--suave)}
 textarea{width:100%;padding:10px;resize:vertical}
+.login{max-width:380px;width:100%;margin:40px auto 0}
+.login label{display:block;margin-bottom:14px;font-weight:600}
+.login input{display:block;width:100%;margin-top:6px;font-weight:400}

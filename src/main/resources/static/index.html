@@ -2,8 +2,29 @@
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PoliRestaurante</title><link rel="stylesheet" href="css/estilos.css"></head>
 <body><header><h1>PoliRestaurante</h1></header>
-<main><section><h2>¿Quién eres hoy?</h2>
-<p><a href="mesero.html"><button style="width:100%">Soy mesero</button></a></p>
-<p><a href="cocina.html"><button style="width:100%">Soy de cocina</button></a></p>
-<p><a href="admin.html"><button style="width:100%">Soy administrador</button></a></p>
-</section></main></body></html>
+<main><section class="login"><h2>Iniciar sesión</h2>
+<form id="login">
+  <label>Usuario<input id="usuario" autocomplete="username" required autofocus></label>
+  <label>Contraseña<input id="clave" type="password" autocomplete="current-password" required></label>
+  <button id="entrar" style="width:100%">Entrar</button>
+</form>
+<p class="nota">Usuarios de prueba: <strong>mesero</strong>, <strong>cocina</strong> y <strong>admin</strong>, con la contraseña 1234.</p>
+</section></main><div id="aviso" role="status"></div>
+<script src="js/api.js"></script>
+<script>
+// Si ya hay una sesión en esta pestaña, se va directo a la pantalla de su rol
+const actual = sesion();
+if (actual) location.replace(PAGINA[actual.rol]);
+
+$('#login').addEventListener('submit', async e => {
+  e.preventDefault();
+  const b = $('#entrar'); b.disabled = true; b.textContent = 'Entrando…';
+  try {
+    const r = await api('/auth/login', 'POST', {username: $('#usuario').value.trim(), password: $('#clave').value});
+    sessionStorage.setItem('sesion', JSON.stringify({token: r.token, id: r.id, rol: r.rol, nombre: r.nombre}));
+    location.replace(PAGINA[r.rol]);
+  } catch (err) {
+    aviso(err.message, true); $('#clave').value = ''; $('#clave').focus();
+  } finally { b.disabled = false; b.textContent = 'Entrar'; }
+});
+</script></body></html>
