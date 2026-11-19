@@ -10,6 +10,7 @@ import com.poli.restaurante.repository.MetodoPagoRepository;
 import com.poli.restaurante.repository.PedidoRepository;
 import com.poli.restaurante.repository.ProductoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -137,6 +138,6 @@ public class PedidoFacade {
 
     @Transactional(readOnly = true)
     public List<MesaResponse> mesas() {
-        return mesaRepository.findAll().stream().map(MesaResponse::de).toList();
+        return mesaRepository.findAll(Sort.by("numero")).stream().map(MesaResponse::de).toList();
     }
 }
