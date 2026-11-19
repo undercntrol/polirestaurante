@@ -10,13 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Verifica que quien llama a un endpoint de administración sea un administrador activo.
- * Mientras no haya token de sesión, el id llega en la cabecera X-Administrador-Id.
+ * El id sale de la sesión (ver seguridad.AutenticacionInterceptor y @UsuarioActual).
  */
 @Service
 @RequiredArgsConstructor
 public class AccesoService {
-
-    public static final String CABECERA_ADMIN = "X-Administrador-Id";
 
     private final AdministradorRepository administradorRepository;
 

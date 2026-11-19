@@ -3,6 +3,7 @@ package com.poli.restaurante.dto;
 import com.poli.restaurante.model.EstadoPago;
 import com.poli.restaurante.model.EstadoPedido;
 import com.poli.restaurante.model.Pedido;
+import com.poli.restaurante.model.Rol;
 import com.poli.restaurante.model.TipoPedido;
 
 import java.math.BigDecimal;
@@ -22,7 +23,9 @@ public record PedidoResponse(
         String metodoPago,
         EstadoPago estadoPago,
         BigDecimal total,
-        List<DetalleResponse> detalles) {
+        List<DetalleResponse> detalles,
+        Rol canceladoPor,
+        String motivoCancelacion) {
 
     /** Debe llamarse dentro de una transacción (las relaciones son LAZY). */
     public static PedidoResponse de(Pedido p) {
@@ -34,6 +37,6 @@ public record PedidoResponse(
                 p.getMesero().getId(), p.getMesero().getNombre(), p.getEstado(),
                 p.getFechaCreacion(), p.getFechaUltimaActualizacion(),
                 p.getMetodoPago() == null ? null : p.getMetodoPago().getNombre(), p.getEstadoPago(),
-                total, detalles);
+                total, detalles, p.getCanceladoPor(), p.getMotivoCancelacion());
     }
 }

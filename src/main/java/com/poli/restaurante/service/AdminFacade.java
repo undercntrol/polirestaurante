@@ -2,6 +2,7 @@ package com.poli.restaurante.service;
 
 import com.poli.restaurante.dto.*;
 import com.poli.restaurante.model.Rol;
+import com.poli.restaurante.seguridad.SesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ public class AdminFacade {
     private final MesaService mesaService;
     private final UsuarioService usuarioService;
     private final ReporteService reporteService;
+    private final SesionService sesiones;
 
     // ----- HU-11: productos -----
 
@@ -122,7 +124,11 @@ public class AdminFacade {
     @Transactional
     public UsuarioResponse cambiarEstadoUsuario(Long adminId, Rol rol, Long usuarioId, boolean activo) {
         acceso.exigirAdministrador(adminId);
-        return UsuarioResponse.de(usuarioService.cambiarEstado(rol, usuarioId, activo, adminId));
+        UsuarioResponse r = UsuarioResponse.de(usuarioService.cambiarEstado(rol, usuarioId, activo, adminId));
+        if (!activo) {
+            sesiones.cerrarSesionesDe(rol, usuarioId); // la cuenta desactivada deja de funcionar de inmediato
+        }
+        return r;
     }
 
     // ----- HU-15: reportes -----

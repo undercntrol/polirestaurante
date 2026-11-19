@@ -23,7 +23,19 @@ public class ManejadorErrores {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
     }
 
-    /** Falta la cabecera X-Administrador-Id u otra cabecera obligatoria. */
+    /** No hay sesión o venció (ver AutenticacionInterceptor). */
+    @ExceptionHandler(NoAutenticadoException.class)
+    public ResponseEntity<Map<String, String>> noAutenticado(NoAutenticadoException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+    }
+
+    /** Hay sesión, pero el rol no puede usar esa ruta. */
+    @ExceptionHandler(SinPermisoException.class)
+    public ResponseEntity<Map<String, String>> sinPermiso(SinPermisoException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+    }
+
+    /** Falta una cabecera obligatoria. */
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<Map<String, String>> faltaCabecera(MissingRequestHeaderException e) {
         return ResponseEntity.badRequest().body(Map.of("error", "Falta la cabecera " + e.getHeaderName()));

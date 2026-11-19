@@ -7,6 +7,7 @@ import com.poli.restaurante.ia.ConfirmacionPedidoIaService;
 import com.poli.restaurante.ia.Evaluador;
 import com.poli.restaurante.ia.Interpretacion;
 import com.poli.restaurante.ia.ItemInterpretado;
+import com.poli.restaurante.seguridad.UsuarioActual;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -43,14 +44,16 @@ public class IaController {
 
     /** El mesero revisó la propuesta (y quizá la corrigió): se crea el pedido. */
     @PostMapping("/pedidos/confirmar")
-    public ResponseEntity<PedidoResponse> confirmar(@Valid @RequestBody ConfirmarPedidoIaRequest req) {
-        PedidoResponse pedido = confirmacion.confirmar(req.meseroId(), req.tipoPedido(), req.mesaNumero(), req.items());
+    public ResponseEntity<PedidoResponse> confirmar(@Valid @RequestBody ConfirmarPedidoIaRequest req,
+                                                    @UsuarioActual Long meseroId) {
+        PedidoResponse pedido = confirmacion.confirmar(meseroId, req.tipoPedido(), req.mesaNumero(), req.items());
         return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
     }
 
     /** Atajo para Postman: interpreta el texto y crea el pedido de una vez, sin paso de revisión. */
     @PostMapping("/pedidos")
-    public ResponseEntity<PedidoIaResponse> crearDesdeTexto(@Valid @RequestBody PedidoDesdeTextoRequest req) {
+    public ResponseEntity<PedidoIaResponse> crearDesdeTexto(@Valid @RequestBody PedidoDesdeTextoRequest req,
+                                                            @UsuarioActual Long meseroId) {
         Interpretacion i = asistente.interpretar(req.texto(), req.motor());
         if (i.items().isEmpty()) {
             throw new ReglaNegocioException("No se pudo armar el pedido: " + String.join("; ", i.advertencias()));
@@ -58,7 +61,7 @@ public class IaController {
         List<ItemConfirmado> items = i.items().stream()
                 .map((ItemInterpretado it) -> new ItemConfirmado(it.productoId(), it.cantidad(), it.notas()))
                 .toList();
-        PedidoResponse pedido = confirmacion.confirmar(req.meseroId(), i.tipoPedido(), i.mesaNumero(), items);
+        PedidoResponse pedido = confirmacion.confirmar(meseroId, i.tipoPedido(), i.mesaNumero(), items);
         return ResponseEntity.status(HttpStatus.CREATED).body(new PedidoIaResponse(i, pedido));
     }
 

@@ -153,7 +153,7 @@ public class PedidoService {
 
     // ---------- Cambio de estado ----------
 
-    /** HU-05 y HU-07: cambios de estado que hace el mesero (entregar, cancelar). */
+    /** HU-05: cambios de estado que hace el mesero (entregar). Para cancelar, ver cancelarPorMesero. */
     @Transactional
     public Pedido cambiarEstadoPorMesero(Long pedidoId, EstadoPedido destino, Long meseroId) {
         return cambiarEstado(buscarPedido(pedidoId), destino, buscarMesero(meseroId));
@@ -165,7 +165,32 @@ public class PedidoService {
         return cambiarEstado(buscarPedido(pedidoId), destino, buscarCocina(cocinaId));
     }
 
+    /** HU-07: el mesero cancela un pedido que aún no se ha entregado. El motivo es opcional. */
+    @Transactional
+    public Pedido cancelarPorMesero(Long pedidoId, Long meseroId, String motivo) {
+        return cancelar(buscarPedido(pedidoId), buscarMesero(meseroId), motivo);
+    }
+
+    /**
+     * Cocina cancela un pedido de su cola (por ejemplo, porque se agotó un ingrediente). Debe indicar
+     * el motivo, porque el mesero lo ve en su pantalla y tiene que explicarle al cliente qué pasó.
+     */
+    @Transactional
+    public Pedido cancelarPorCocina(Long pedidoId, Long cocinaId, String motivo) {
+        if (motivo == null || motivo.isBlank()) {
+            throw new ReglaNegocioException("Indica el motivo de la cancelación para que el mesero sepa qué pasó");
+        }
+        return cancelar(buscarPedido(pedidoId), buscarCocina(cocinaId), motivo);
+    }
+
     // ---------- Internos ----------
+
+    /** Solo se puede cancelar desde PENDIENTE o EN_PREPARACION (lo valida cambiarEstado). */
+    private Pedido cancelar(Pedido pedido, Usuario actor, String motivo) {
+        cambiarEstado(pedido, EstadoPedido.CANCELADO, actor);
+        pedido.setMotivoCancelacion(motivo == null || motivo.isBlank() ? null : motivo.trim());
+        return pedido;
+    }
 
     /**
      * Único punto por donde cambia el estado de un pedido.
@@ -179,6 +204,9 @@ public class PedidoService {
         }
         pedido.setEstado(destino);
         pedido.setFechaUltimaActualizacion(LocalDateTime.now());
+        if (destino == EstadoPedido.CANCELADO) {
+            pedido.setCanceladoPor(actor.getRol());
+        }
         registrarHistorial(pedido, destino, actor);
 
         if (destino == EstadoPedido.ENTREGADO || destino == EstadoPedido.CANCELADO) {
@@ -190,7 +218,8 @@ public class PedidoService {
     private void validarRol(Usuario actor, EstadoPedido destino) {
         boolean permitido = switch (destino) {
             case EN_PREPARACION, LISTO -> actor.getRol() == Rol.COCINA;
-            case ENTREGADO, CANCELADO -> actor.getRol() == Rol.MESERO;
+            case ENTREGADO -> actor.getRol() == Rol.MESERO;
+            case CANCELADO -> actor.getRol() == Rol.MESERO || actor.getRol() == Rol.COCINA;
             case PENDIENTE -> false;
         };
         if (!permitido) {

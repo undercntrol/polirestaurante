@@ -55,6 +55,14 @@ public class Pedido {
     @Column(name = "estado_pago", nullable = false)
     private EstadoPago estadoPago = EstadoPago.PENDIENTE;
 
+    /** HU-07: quién canceló (MESERO o COCINA) y por qué. Vacíos si el pedido no está cancelado. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cancelado_por", length = 20)
+    private Rol canceladoPor;
+
+    @Column(name = "motivo_cancelacion", length = 200)
+    private String motivoCancelacion;
+
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetallePedido> detalles = new ArrayList<>();
 

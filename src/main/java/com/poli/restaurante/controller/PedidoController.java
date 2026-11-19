@@ -3,6 +3,7 @@ package com.poli.restaurante.controller;
 import com.poli.restaurante.dto.*;
 import com.poli.restaurante.model.EstadoPedido;
 import com.poli.restaurante.service.PedidoFacade;
+import com.poli.restaurante.seguridad.UsuarioActual;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/** HU-01, HU-02 y HU-05 a HU-08: lo que hace el mesero sobre un pedido. HU-10: historial de estados. */
+/**
+ * HU-01, HU-02 y HU-05 a HU-08: lo que hace el mesero sobre un pedido. HU-10: historial de estados.
+ * Solo para el rol MESERO; el mesero que actúa es el de la sesión (@UsuarioActual), no un id del cuerpo.
+ */
 @RestController
 @RequestMapping("/api/pedidos")
 @RequiredArgsConstructor
@@ -21,13 +25,14 @@ public class PedidoController {
 
     /** HU-01: crear pedido y asignar mesa. */
     @PostMapping
-    public ResponseEntity<PedidoResponse> crear(@Valid @RequestBody CrearPedidoRequest req) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(facade.crear(req));
+    public ResponseEntity<PedidoResponse> crear(@Valid @RequestBody CrearPedidoRequest req,
+                                                @UsuarioActual Long meseroId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(facade.crear(req, meseroId));
     }
 
-    /** HU-08: pedidos activos del mesero (ni entregados ni cancelados). Ej.: GET /api/pedidos/activos?meseroId=1 */
+    /** HU-08: pedidos activos del mesero que inició sesión (ni entregados ni cancelados). */
     @GetMapping("/activos")
-    public List<PedidoResponse> activos(@RequestParam Long meseroId) {
+    public List<PedidoResponse> activos(@UsuarioActual Long meseroId) {
         return facade.activosDelMesero(meseroId);
     }
 
@@ -56,22 +61,25 @@ public class PedidoController {
 
     /** HU-05: marcar como entregado. */
     @PutMapping("/{id}/entregar")
-    public PedidoResponse entregar(@PathVariable Long id, @Valid @RequestBody MeseroRequest req) {
-        return facade.cambiarEstadoPorMesero(id, EstadoPedido.ENTREGADO, req.meseroId());
+    public PedidoResponse entregar(@PathVariable Long id, @UsuarioActual Long meseroId) {
+        return facade.cambiarEstadoPorMesero(id, EstadoPedido.ENTREGADO, meseroId);
     }
 
     /**
      * HU-07: cancelar un pedido que no se ha entregado (solo desde PENDIENTE o EN_PREPARACION).
      * Si era el único pedido activo de la mesa, la mesa queda libre y el pedido sale de la cola de cocina.
+     * El cuerpo es opcional: {"motivo": "el cliente se fue"}.
      */
     @PutMapping("/{id}/cancelar")
-    public PedidoResponse cancelar(@PathVariable Long id, @Valid @RequestBody MeseroRequest req) {
-        return facade.cambiarEstadoPorMesero(id, EstadoPedido.CANCELADO, req.meseroId());
+    public PedidoResponse cancelar(@PathVariable Long id, @UsuarioActual Long meseroId,
+                                   @Valid @RequestBody(required = false) CancelarPedidoRequest req) {
+        return facade.cancelarPorMesero(id, req == null ? null : req.motivo(), meseroId);
     }
 
     /** HU-06: registrar el método de pago de un pedido entregado. */
     @PutMapping("/{id}/pago")
-    public PedidoResponse registrarPago(@PathVariable Long id, @Valid @RequestBody RegistrarPagoRequest req) {
-        return facade.registrarPago(id, req);
+    public PedidoResponse registrarPago(@PathVariable Long id, @Valid @RequestBody RegistrarPagoRequest req,
+                                        @UsuarioActual Long meseroId) {
+        return facade.registrarPago(id, req, meseroId);
     }
 }

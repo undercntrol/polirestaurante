@@ -35,8 +35,8 @@ public class PedidoFacade {
     // ----- Mesero -----
 
     @Transactional
-    public PedidoResponse crear(CrearPedidoRequest req) {
-        return PedidoResponse.de(pedidoService.crearPedido(req.mesaId(), req.meseroId(), req.tipoPedido()));
+    public PedidoResponse crear(CrearPedidoRequest req, Long meseroId) {
+        return PedidoResponse.de(pedidoService.crearPedido(req.mesaId(), meseroId, req.tipoPedido()));
     }
 
     @Transactional
@@ -54,8 +54,8 @@ public class PedidoFacade {
 
     /** HU-06 */
     @Transactional
-    public PedidoResponse registrarPago(Long pedidoId, RegistrarPagoRequest req) {
-        return PedidoResponse.de(pedidoService.registrarPago(pedidoId, req.metodoPagoId(), req.meseroId()));
+    public PedidoResponse registrarPago(Long pedidoId, RegistrarPagoRequest req, Long meseroId) {
+        return PedidoResponse.de(pedidoService.registrarPago(pedidoId, req.metodoPagoId(), meseroId));
     }
 
     @Transactional(readOnly = true)
@@ -96,8 +96,8 @@ public class PedidoFacade {
 
     /** HU-09 */
     @Transactional
-    public ProductoResponse cambiarDisponibilidad(Long productoId, DisponibilidadRequest req) {
-        return ProductoResponse.de(productoService.cambiarDisponibilidad(productoId, req.disponible(), req.cocinaId()));
+    public ProductoResponse cambiarDisponibilidad(Long productoId, DisponibilidadRequest req, Long cocinaId) {
+        return ProductoResponse.de(productoService.cambiarDisponibilidad(productoId, req.disponible(), cocinaId));
     }
 
     // ----- Cambios de estado -----
@@ -110,6 +110,17 @@ public class PedidoFacade {
     @Transactional
     public PedidoResponse cambiarEstadoPorCocina(Long pedidoId, EstadoPedido destino, Long cocinaId) {
         return PedidoResponse.de(pedidoService.cambiarEstadoPorCocina(pedidoId, destino, cocinaId));
+    }
+
+    /** HU-07 */
+    @Transactional
+    public PedidoResponse cancelarPorMesero(Long pedidoId, String motivo, Long meseroId) {
+        return PedidoResponse.de(pedidoService.cancelarPorMesero(pedidoId, meseroId, motivo));
+    }
+
+    @Transactional
+    public PedidoResponse cancelarPorCocina(Long pedidoId, String motivo, Long cocinaId) {
+        return PedidoResponse.de(pedidoService.cancelarPorCocina(pedidoId, cocinaId, motivo));
     }
 
     // ----- Consultas de apoyo para el frontend del mesero -----

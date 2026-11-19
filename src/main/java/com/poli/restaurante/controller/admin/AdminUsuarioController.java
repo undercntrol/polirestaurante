@@ -5,8 +5,8 @@ import com.poli.restaurante.dto.UsuarioRequest;
 import com.poli.restaurante.dto.UsuarioResponse;
 import com.poli.restaurante.exception.ReglaNegocioException;
 import com.poli.restaurante.model.Rol;
-import com.poli.restaurante.service.AccesoService;
 import com.poli.restaurante.service.AdminFacade;
+import com.poli.restaurante.seguridad.UsuarioActual;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,12 +24,12 @@ public class AdminUsuarioController {
     private final AdminFacade facade;
 
     @GetMapping
-    public List<UsuarioResponse> listar(@RequestHeader(AccesoService.CABECERA_ADMIN) Long adminId) {
+    public List<UsuarioResponse> listar(@UsuarioActual Long adminId) {
         return facade.usuarios(adminId);
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioResponse> crear(@RequestHeader(AccesoService.CABECERA_ADMIN) Long adminId,
+    public ResponseEntity<UsuarioResponse> crear(@UsuarioActual Long adminId,
                                                  @Valid @RequestBody UsuarioRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(facade.crearUsuario(adminId, req));
     }
@@ -39,7 +39,7 @@ public class AdminUsuarioController {
      * por eso la ruta lleva el rol. Ej.: PUT /api/admin/usuarios/mesero/2/estado
      */
     @PutMapping("/{rol}/{id}/estado")
-    public UsuarioResponse cambiarEstado(@RequestHeader(AccesoService.CABECERA_ADMIN) Long adminId,
+    public UsuarioResponse cambiarEstado(@UsuarioActual Long adminId,
                                          @PathVariable String rol, @PathVariable Long id,
                                          @Valid @RequestBody EstadoUsuarioRequest req) {
         return facade.cambiarEstadoUsuario(adminId, rolDe(rol), id, req.activo());

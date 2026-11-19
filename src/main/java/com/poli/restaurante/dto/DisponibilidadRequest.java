@@ -2,7 +2,6 @@ package com.poli.restaurante.dto;
 
 import jakarta.validation.constraints.NotNull;
 
-public record DisponibilidadRequest(
-        @NotNull Boolean disponible,
-        @NotNull Long cocinaId) {
+/** El usuario de cocina sale de la sesión (token), no del cuerpo. */
+public record DisponibilidadRequest(@NotNull Boolean disponible) {
 }
